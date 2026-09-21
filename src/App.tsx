@@ -96,7 +96,7 @@ export default function App() {
       {/* App Header */}
       <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-2xl bg-card px-4 py-3 ring-1 ring-white/[0.06]">
         <div className="flex items-center gap-3">
-          <LogoMark size={24} />
+          
           <div>
             <h1 className="text-base font-semibold tracking-tight text-white leading-none">
               OneClick
