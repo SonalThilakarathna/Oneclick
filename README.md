@@ -6,7 +6,7 @@
 
 Supabase · Git · Dev servers · VS Code / Cursor / Antigravity · Claude Code / Codex · cURL, all one click away.
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-indigo.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-be1f6e.svg)](LICENSE)
 ![Tauri 2](https://img.shields.io/badge/Tauri-2-24C8DB?logo=tauri&logoColor=white)
 ![Rust](https://img.shields.io/badge/Rust-stable-orange?logo=rust&logoColor=white)
 ![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)

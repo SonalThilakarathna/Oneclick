@@ -1,9 +1,27 @@
+@import "@fontsource-variable/inter";
 @import "tailwindcss";
+
+/*
+  Accent: #b9de07 (lime) — reserved for logo mark, active states, primary CTAs.
+  Surfaces: near-black charcoal. Text: white primary / muted grey secondary.
+*/
+@theme {
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-brand-300: #d4f06a;
+  --color-brand-400: #c6e83a;
+  --color-brand-500: #b9de07;
+  --color-brand-600: #a3c406;
+  --color-brand-700: #87a205;
+  --color-brand-800: #6a8004;
+  --color-surface: #0b0b0b;
+  --color-surface-raised: #121212;
+  --color-surface-muted: #161616;
+}
 
 :root {
   color-scheme: dark;
-  font-family:
-    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss03";
 }
 
 html,
@@ -11,12 +29,22 @@ body,
 #root {
   height: 100%;
   margin: 0;
-  background: #09090b;
+  background: #0b0b0b;
+  color: #f5f5f5;
 }
 
 code {
   border-radius: 0.25rem;
-  background: rgb(39 39 42 / 0.8);
+  background: rgb(255 255 255 / 0.06);
   padding: 0.05rem 0.3rem;
   font-size: 0.85em;
+}
+
+::selection {
+  background: rgb(185 222 7 / 0.35);
+  color: #0b0b0b;
+}
+
+textarea {
+  resize: none;
 }

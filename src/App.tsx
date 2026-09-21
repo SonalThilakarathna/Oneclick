@@ -9,6 +9,7 @@ import { LaunchCard } from "./components/LaunchCard";
 import { ProjectBar } from "./components/ProjectBar";
 import { SupabaseCard } from "./components/SupabaseCard";
 import { ToolboxCard } from "./components/ToolboxCard";
+import { LogoMark } from "./components/icons";
 import { LogConsole } from "./components/ui";
 
 const STORAGE_KEY = "oneclick.projectDir";
@@ -63,16 +64,19 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen flex-col gap-4 bg-zinc-950 p-5 text-zinc-200">
-      <header className="flex items-baseline justify-between">
-        <h1 className="text-xl font-bold tracking-tight text-zinc-50">
-          One<span className="text-indigo-400">Click</span>
+    <div className="flex min-h-screen flex-col gap-5 bg-[#0b0b0b] p-4 text-zinc-300 lg:h-screen lg:p-6">
+      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <h1 className="flex items-center gap-2.5 text-[22px] font-semibold tracking-tight text-white">
+          <LogoMark />
+          OneClick
         </h1>
-        <span className="text-xs text-zinc-500">Supabase · Git · Dev · Editors · AI CLIs · cURL</span>
+        <span className="text-[11px] tracking-wide text-zinc-600">
+          Local workflow dashboard
+        </span>
       </header>
 
       {!isTauri && (
-        <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-sm text-amber-300">
+        <p className="rounded-xl bg-amber-500/8 px-4 py-2.5 text-sm text-amber-300/90 ring-1 ring-inset ring-amber-500/20">
           Running in a plain browser: buttons need the desktop shell. Start it with{" "}
           <code>npm run tauri dev</code>.
         </p>
@@ -80,8 +84,9 @@ export default function App() {
 
       <ProjectBar projectDir={projectDir} onPick={choose} />
 
-      <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {/* Two columns from lg up (tools | command canvas); one stacked column below. */}
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-5 lg:grid-cols-[minmax(300px,360px)_minmax(0,1fr)]">
+        <aside aria-label="Tools" className="flex min-h-0 flex-col gap-3 lg:overflow-y-auto lg:pr-1">
           <SupabaseCard
             projectDir={projectDir}
             status={supabase.data}
@@ -100,17 +105,17 @@ export default function App() {
             runner={runner}
             onDone={refreshAll}
           />
-          <div className="md:col-span-1 xl:col-span-2 [&>section]:h-full">
-            <LaunchCard projectDir={projectDir} available={available} runner={runner} />
-          </div>
+          <LaunchCard projectDir={projectDir} available={available} runner={runner} />
           <ToolboxCard projectDir={projectDir} runner={runner} onDone={refreshAll} />
-          <div className="md:col-span-2 xl:col-span-3">
+        </aside>
+
+        <main aria-label="Command canvas" className="flex min-h-0 flex-col gap-3">
+          <div className="min-h-0 flex-1 lg:overflow-y-auto lg:pr-1">
             <CurlPanel projectDir={projectDir} runner={runner} />
           </div>
-        </div>
+          <LogConsole log={runner.log} onClear={runner.clear} />
+        </main>
       </div>
-
-      <LogConsole log={runner.log} onClear={runner.clear} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { api, type DevAction, type ProjectInfo } from "../lib/api";
 import type { useRunner } from "../hooks/useRunner";
-import { ActionButton, Card, StatusDot, type DotState } from "./ui";
+import { IconPlay } from "./icons";
+import { ActionButton, ActionRow, Card, StatusDot, type DotState } from "./ui";
 
 type Runner = ReturnType<typeof useRunner>;
 
@@ -59,31 +60,43 @@ export function DevCard({
   };
 
   return (
-    <Card title="Dev Server" icon="🚀" status={<StatusDot state={dot} label={label} />}>
-      <p className="min-h-5 text-xs text-zinc-500">
+    <Card
+      title="Dev Server"
+      icon={<IconPlay />}
+      iconTone="play"
+      status={<StatusDot state={dot} label={label} />}
+    >
+      <p className="text-xs leading-relaxed text-zinc-500">
         {info?.detail ??
           (info?.hasPackageJson
             ? `Using ${pm}${devScript ? ` · dev script: ${devScript}` : " · no dev/start script"}`
             : "Run, build and install your Node project.")}
       </p>
-      <div className="grid grid-cols-2 gap-2">
+      <ActionButton
+        variant="success"
+        size="lg"
+        className="w-full"
+        disabled={disabled || !devScript}
+        onClick={() =>
+          projectDir && runner.run("Dev: Start Server", () => api.devServer(projectDir))
+        }
+      >
+        Run Dev Server
+      </ActionButton>
+      <ActionRow>
         <ActionButton
-          variant="primary"
-          className="col-span-2"
-          disabled={disabled || !devScript}
-          onClick={() =>
-            projectDir && runner.run("Dev: Start Server", () => api.devServer(projectDir))
-          }
+          variant="soft"
+          size="sm"
+          className="flex-1"
+          disabled={disabled || !info?.scripts.includes("build")}
+          onClick={build}
         >
-          Run Dev Server
-        </ActionButton>
-        <ActionButton disabled={disabled || !info?.scripts.includes("build")} onClick={build}>
           Build
         </ActionButton>
-        <ActionButton disabled={disabled} onClick={install}>
+        <ActionButton variant="soft" size="sm" className="flex-1" disabled={disabled} onClick={install}>
           Install Deps
         </ActionButton>
-      </div>
+      </ActionRow>
     </Card>
   );
 }

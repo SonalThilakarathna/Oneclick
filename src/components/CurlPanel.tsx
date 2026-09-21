@@ -11,7 +11,8 @@ import {
   type CurlTemplate,
 } from "../lib/curlTemplates";
 import type { useRunner } from "../hooks/useRunner";
-import { ActionButton, Card, inputClass } from "./ui";
+import { IconRequest } from "./icons";
+import { ActionButton, ActionRow, Card, TextArea, inputClass } from "./ui";
 
 type Runner = ReturnType<typeof useRunner>;
 
@@ -79,10 +80,10 @@ export function CurlPanel({
   };
 
   return (
-    <Card title="cURL Templates" icon="🌐">
-      <form onSubmit={send} className="flex flex-col gap-3">
+    <Card title="cURL Templates" icon={<IconRequest />} iconTone="request" className="h-full">
+      <form onSubmit={send} className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
-          <label className="text-xs uppercase tracking-wide text-zinc-500" htmlFor="curl-template">
+          <label className="text-[10px] font-medium uppercase tracking-[0.1em] text-zinc-600" htmlFor="curl-template">
             Template
           </label>
           <select
@@ -115,7 +116,7 @@ export function CurlPanel({
             aria-label="HTTP method"
             value={draft.method}
             onChange={(e) => patch({ method: e.target.value })}
-            className={`${inputClass} w-28 font-mono`}
+            className={`${inputClass} w-24 font-mono text-xs`}
           >
             {METHODS.map((m) => (
               <option key={m}>{m}</option>
@@ -127,79 +128,84 @@ export function CurlPanel({
             onChange={(e) => patch({ url: e.target.value })}
             placeholder="https://api.example.com/resource"
             spellCheck={false}
-            className={`${inputClass} min-w-0 flex-1 font-mono`}
+            className={`${inputClass} min-w-0 flex-1 font-mono text-xs`}
           />
           <ActionButton
             type="submit"
             variant="primary"
+            size="lg"
             disabled={!projectDir || runner.busy !== null || !draft.url.trim()}
           >
             Send
           </ActionButton>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <label className="flex flex-col gap-1 text-xs uppercase tracking-wide text-zinc-500">
-            Headers (one per line)
-            <textarea
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <label className="flex flex-col gap-1.5 text-[10px] font-medium uppercase tracking-[0.1em] text-zinc-600">
+            Headers
+            <TextArea
               value={draft.headers}
               onChange={(e) => patch({ headers: e.target.value })}
               rows={5}
               spellCheck={false}
               placeholder="Name: value"
-              className={`${inputClass} font-mono normal-case tracking-normal`}
+              className="font-mono text-xs normal-case tracking-normal text-zinc-400"
             />
           </label>
-          <label className="flex flex-col gap-1 text-xs uppercase tracking-wide text-zinc-500">
+          <label className="flex flex-col gap-1.5 text-[10px] font-medium uppercase tracking-[0.1em] text-zinc-600">
             Body
-            <textarea
+            <TextArea
               value={noBody ? "" : draft.body}
               onChange={(e) => patch({ body: e.target.value })}
               rows={5}
               disabled={noBody}
               spellCheck={false}
               placeholder={noBody ? "HEAD requests have no body" : '{ "key": "value" }'}
-              className={`${inputClass} font-mono normal-case tracking-normal`}
+              className="font-mono text-xs normal-case tracking-normal text-zinc-400"
             />
           </label>
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-zinc-400">
+        <label className="flex items-center gap-2 text-sm text-zinc-500">
           <input
             type="checkbox"
             checked={draft.followRedirects}
             onChange={(e) => patch({ followRedirects: e.target.checked })}
-            className="accent-indigo-500"
+            className="accent-brand-500"
           />
           Follow redirects (max 5)
         </label>
 
         {placeholders && (
-          <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
+          <p className="rounded-lg bg-amber-500/8 px-3 py-2 text-xs text-amber-300/90 ring-1 ring-inset ring-amber-500/20">
             This template contains <code>YOUR_…</code> placeholders. Replace them before sending.
           </p>
         )}
 
-        <div className="flex flex-col gap-2">
-          <p className="text-xs uppercase tracking-wide text-zinc-500">
-            Copy-paste command (bash / zsh / Git Bash)
+        <div className="flex flex-col gap-2.5">
+          <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-zinc-600">
+            Copy-paste command
           </p>
-          <pre className="max-h-32 overflow-auto whitespace-pre-wrap break-all rounded-lg border border-zinc-800 bg-black/40 p-3 font-mono text-xs text-zinc-300">
+          <pre className="max-h-32 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-black/30 p-3 font-mono text-[11px] leading-relaxed text-zinc-500">
             {command}
           </pre>
-          <div className="flex flex-wrap items-center gap-2">
-            <ActionButton onClick={copy}>{copied ? "Copied ✓" : "Copy command"}</ActionButton>
-            <ActionButton onClick={save}>{isSaved ? "Update template" : "Save as template"}</ActionButton>
+          <ActionRow>
+            <ActionButton variant="outline" size="sm" onClick={copy}>
+              {copied ? "Copied" : "Copy command"}
+            </ActionButton>
+            <ActionButton variant="ghost" size="sm" onClick={save}>
+              {isSaved ? "Update template" : "Save as template"}
+            </ActionButton>
             {isSaved && (
-              <ActionButton variant="danger" onClick={remove}>
-                Delete template
+              <ActionButton variant="ghost" size="sm" className="text-rose-400/80" onClick={remove}>
+                Delete
               </ActionButton>
             )}
-          </div>
-          <p className="text-xs text-zinc-600">
+          </ActionRow>
+          <p className="text-[11px] leading-relaxed text-zinc-600">
             Saved templates live unencrypted in this app’s local storage. Keep placeholders such as{" "}
-            <code>YOUR_TOKEN</code> in them, not real secrets. Only http(s) is allowed and requests time out
-            after 30 s.
+            <code>YOUR_TOKEN</code> in them, not real secrets. Only http(s) is allowed and requests time
+            out after 30 s.
           </p>
         </div>
       </form>

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { api, type GitStatus } from "../lib/api";
 import type { useRunner } from "../hooks/useRunner";
+import { IconBranch } from "./icons";
 import { ActionButton, Card, Modal, StatusDot, inputClass, type DotState } from "./ui";
 
 type Runner = ReturnType<typeof useRunner>;
@@ -52,14 +53,20 @@ export function GitCard({
   };
 
   return (
-    <Card title="Git" icon="🌿" status={<StatusDot state={dot} label={label} />}>
-      <p className="min-h-5 text-xs text-zinc-500">
+    <Card
+      title="Git"
+      icon={<IconBranch />}
+      iconTone="branch"
+      status={<StatusDot state={dot} label={label} />}
+    >
+      <p className="text-xs leading-relaxed text-zinc-500">
         {status?.isRepo
           ? `Branch: ${status.branch ?? "(detached HEAD)"}`
           : (status?.detail ?? "Stage, commit and push in one step.")}
       </p>
       <ActionButton
-        variant="primary"
+        variant="outline"
+        className="w-full"
         disabled={!projectDir || !status?.isRepo || runner.busy !== null}
         onClick={() => setOpen(true)}
       >
@@ -81,7 +88,9 @@ export function GitCard({
               className={inputClass}
             />
             <div className="flex justify-end gap-2">
-              <ActionButton onClick={() => setOpen(false)}>Cancel</ActionButton>
+              <ActionButton variant="ghost" onClick={() => setOpen(false)}>
+                Cancel
+              </ActionButton>
               <ActionButton type="submit" variant="primary" disabled={!message.trim()}>
                 Commit & Push
               </ActionButton>
