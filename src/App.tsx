@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, isTauri, pickFolder, type LaunchTool } from "./lib/api";
 import { usePolling } from "./hooks/usePolling";
+import { useCustomCommands } from "./hooks/useCustomCommands";
 import { useRunner } from "./hooks/useRunner";
 import { CurlPanel } from "./components/CurlPanel";
+import { CustomCommandsCard } from "./components/CustomCommandsCard";
 import { DevCard } from "./components/DevCard";
 import { GitCard } from "./components/GitCard";
 import { LaunchCard } from "./components/LaunchCard";
@@ -25,6 +27,7 @@ function loadProjectDir(): string | null {
 export default function App() {
   const [projectDir, setProjectDir] = useState<string | null>(loadProjectDir);
   const runner = useRunner();
+  const customCommands = useCustomCommands();
 
   const supabaseFetcher = useCallback(
     () => api.supabaseStatus(projectDir!),
@@ -102,6 +105,12 @@ export default function App() {
           <DevCard
             projectDir={projectDir}
             info={project.data}
+            runner={runner}
+            onDone={refreshAll}
+          />
+          <CustomCommandsCard
+            projectDir={projectDir}
+            store={customCommands}
             runner={runner}
             onDone={refreshAll}
           />

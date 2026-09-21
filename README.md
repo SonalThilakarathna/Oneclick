@@ -52,9 +52,14 @@ does not replace your tools. It just drives the ones you already have installed.
 | | Environment Check | reports which tools are installed and their versions |
 | | Open Terminal / Open Folder | native terminal or file manager at the project |
 | **cURL Templates** | Send | a validated `curl` request built from a template you can edit |
+| **My Commands** | your own buttons | any command line you save: shown in the output panel, or in its own terminal window for long-running ones |
 
 Also included:
 
+- **Custom commands.** Not every project uses Supabase or `npm run dev`, so the built-in cards are just the
+  defaults. Press **+ Add** on **My Commands**, name the button, type the command (for example `pytest -q` or
+  `cargo test && cargo clippy`) and pick where it runs. Buttons can belong to one project or to all of them, are
+  saved on your machine, and can be edited or deleted with the pencil icon.
 - **Live output panel** streams stdout and stderr as commands run.
 - **Status lights** show Supabase running/stopped, Git branch and changed-file count, and whether dependencies are installed.
 - **Smart package manager**: uses `pnpm`, `yarn` or `bun` automatically when it finds their lockfile, otherwise `npm`.
@@ -233,9 +238,10 @@ flowchart LR
 ```
 src/
   App.tsx                 layout, polling, project selection
-  components/             one file per card (SupabaseCard, GitCard, DevCard, LaunchCard, ToolboxCard, CurlPanel)
-  hooks/                  useRunner (one workflow at a time + log), usePolling (status lights)
+  components/             one file per card (SupabaseCard, GitCard, DevCard, LaunchCard, ToolboxCard, CustomCommandsCard, CurlPanel)
+  hooks/                  useRunner (one workflow at a time + log), usePolling (status lights), useCustomCommands (saved buttons)
   lib/api.ts              typed wrapper around every Tauri command
+  lib/customCommands.ts   saved custom command model + localStorage persistence
   lib/curlTemplates.ts    built-in cURL templates + "copy as curl" builder
 src-tauri/src/
   runner.rs               safe process spawning + live output streaming
@@ -244,6 +250,7 @@ src-tauri/src/
   launch.rs               editors, AI CLIs, tool detection, terminal / file manager
   toolbox.rs              git pull / log, docker ps, environment check
   curl.rs                 validated curl request builder + runner (unit-tested)
+  custom.rs               runs a user-saved command line (output panel or terminal window)
   terminal.rs             cross-platform "open a terminal here"
 ```
 
@@ -251,10 +258,14 @@ src-tauri/src/
 
 OneClick runs commands on your machine, so it is deliberately strict.
 
-- **The webview has no shell or filesystem access.** It can only call the 13 fixed Rust commands registered in
-  `src-tauri/src/lib.rs`. It cannot submit an arbitrary command line.
-- **No shell, ever.** Processes are spawned directly with each argument passed separately, so a commit message
-  like `"; rm -rf /` is just text.
+- **The webview has no shell or filesystem access.** It can only call the fixed Rust commands registered in
+  `src-tauri/src/lib.rs`.
+- **Built-in workflows never use a shell.** Processes are spawned directly with each argument passed separately,
+  so a commit message like `"; rm -rf /` is just text.
+- **My Commands is the one deliberate exception.** A saved custom command is run through `cmd /C` or `sh -c`
+  because it is a command line you wrote yourself, so pipes, `&&` and quoting work. It is exactly as powerful as
+  typing it in your own terminal, and nothing from git, the network or a project file is ever added to it.
+  It must be a single non-empty line, and it only runs when you press its button.
 - **cURL is the one flexible command**, so its input is validated and hardened (`src-tauri/src/curl.rs`):
   the method comes from an allow-list; the URL must be `http(s)` with no whitespace; header names are validated;
   `-q` ignores any `~/.curlrc`; `--proto` blocks `file://`, `ftp://` and friends; `--data-raw` means a body
@@ -290,7 +301,8 @@ Contributions are welcome. The codebase is small on purpose.
 3. **Type it** in `src/lib/api.ts`.
 4. **Add the button** to a card in `src/components/` and wrap the call in `runner.run("Label", …)`.
 
-Rules of the road: never build a command line from user text. Pass arguments as separate strings, validate
+Rules of the road: never build a command line from user text (the only shell path is `custom.rs`, which runs a
+line the user saved on purpose). Pass arguments as separate strings, validate
 anything user-supplied, and add a unit test when you do.
 
 ### Run the checks

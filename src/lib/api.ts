@@ -82,6 +82,10 @@ export const api = {
     invoke<ActionResult>("toolbox_run", { action, projectDir, runId }),
   curlRequest: (request: CurlRequest, projectDir: string, runId: string) =>
     invoke<ActionResult>("curl_request", { request, projectDir, runId }),
+  customRun: (command: string, projectDir: string, runId: string) =>
+    invoke<ActionResult>("custom_run", { command, projectDir, runId }),
+  customRunTerminal: (command: string, projectDir: string) =>
+    invoke<ActionResult>("custom_run_terminal", { command, projectDir }),
 };
 
 export function onOutput(handler: (line: OutputLine) => void): Promise<UnlistenFn> {
