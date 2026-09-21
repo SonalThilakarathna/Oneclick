@@ -1,5 +1,6 @@
 //! Opens a native terminal window in a project folder, optionally running a
-//! fixed command (never user-supplied text) inside it.
+//! command inside it. `open` only takes a fixed program plus arguments;
+//! `open_shell` runs a line the user wrote themselves (a saved custom command).
 
 use std::path::Path;
 use std::process::Command;
@@ -19,6 +20,32 @@ pub fn open(dir: &Path, title: &str, command: Option<Program>) -> Result<(), Str
     }
     cmd.creation_flags(0x0800_0000); // CREATE_NO_WINDOW for the launcher only
     runner::spawn_detached(cmd)
+}
+
+/// Opens a terminal window that runs a user-written shell `line` and stays open
+/// afterwards, so long-running commands and their output remain visible.
+#[cfg(target_os = "windows")]
+pub fn open_shell(dir: &Path, line: &str) -> Result<(), String> {
+    use std::os::windows::process::CommandExt;
+    const CREATE_NEW_CONSOLE: u32 = 0x0000_0010;
+    let mut cmd = Command::new("cmd");
+    // Raw + quoted so cmd.exe receives the line exactly as typed.
+    cmd.current_dir(dir)
+        .raw_arg("/K")
+        .raw_arg(format!("\"{line}\""))
+        .creation_flags(CREATE_NEW_CONSOLE);
+    runner::spawn_detached(cmd)
+}
+
+#[cfg(target_os = "macos")]
+pub fn open_shell(dir: &Path, line: &str) -> Result<(), String> {
+    open(dir, "", Some((line, &[])))
+}
+
+#[cfg(all(unix, not(target_os = "macos")))]
+pub fn open_shell(dir: &Path, line: &str) -> Result<(), String> {
+    let script = format!("{line}; exec \"${{SHELL:-sh}}\"");
+    open(dir, "", Some(("sh", &["-c", &script])))
 }
 
 #[cfg(target_os = "macos")]
