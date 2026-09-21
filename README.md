@@ -39,6 +39,7 @@ does not replace your tools. It just drives the ones you already have installed.
 | | Stop Local | `supabase stop` |
 | | Reset DB | `supabase db reset` (asks first) |
 | | Deploy to Remote | `supabase db push --yes` (asks first) |
+| | Deploy Functions… | `supabase functions deploy` for all functions, or `supabase functions deploy <name>` per ticked function in `supabase/functions` |
 | **Git** | Quick Commit & Push | `git add .` → `git commit -m "<message>"` → `git push` (publishes new branches with `-u origin`) |
 | **Dev Server** | Run Dev Server | `npm run dev` (falls back to `start`) in its own terminal window |
 | | Build | `npm run build`, streamed live |

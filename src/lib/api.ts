@@ -60,6 +60,11 @@ export const api = {
     invoke<ServiceStatus>("supabase_status", { projectDir }),
   supabaseRun: (action: SupabaseAction, projectDir: string, runId: string) =>
     invoke<ActionResult>("supabase_run", { action, projectDir, runId }),
+  supabaseFunctionsList: (projectDir: string) =>
+    invoke<string[]>("supabase_functions_list", { projectDir }),
+  /** An empty `functions` list deploys every edge function. */
+  supabaseFunctionsDeploy: (functions: string[], projectDir: string, runId: string) =>
+    invoke<ActionResult>("supabase_functions_deploy", { functions, projectDir, runId }),
   gitStatus: (projectDir: string) => invoke<GitStatus>("git_status", { projectDir }),
   gitCommitPush: (message: string, projectDir: string, runId: string) =>
     invoke<ActionResult>("git_commit_push", { message, projectDir, runId }),
