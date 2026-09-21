@@ -1,5 +1,6 @@
 mod commands;
 mod curl;
+mod custom;
 mod devtools;
 mod launch;
 mod runner;
@@ -26,6 +27,8 @@ pub fn run() {
             launch::open_folder,
             toolbox::toolbox_run,
             curl::curl_request,
+            custom::custom_run,
+            custom::custom_run_terminal,
         ])
         .run(tauri::generate_context!())
         .expect("error while running OneClick");

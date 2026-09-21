@@ -81,6 +81,25 @@ export function IconWrench(props: IconProps) {
   );
 }
 
+/** Bolt mark — custom commands */
+export function IconBolt(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M13 3 5 13.5h6L10 21l8-10.5h-6L13 3z" />
+    </Icon>
+  );
+}
+
+/** Pencil mark — edit */
+export function IconPencil(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3z" />
+      <path d="m14.5 7.5 2 2" />
+    </Icon>
+  );
+}
+
 /** Request / terminal mark — cURL */
 export function IconRequest(props: IconProps) {
   return (
