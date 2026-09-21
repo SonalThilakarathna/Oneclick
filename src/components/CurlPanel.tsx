@@ -169,7 +169,7 @@ export function CurlPanel({
             type="checkbox"
             checked={draft.followRedirects}
             onChange={(e) => patch({ followRedirects: e.target.checked })}
-            className="accent-indigo-500"
+            className="accent-brand-500"
           />
           Follow redirects (max 5)
         </label>

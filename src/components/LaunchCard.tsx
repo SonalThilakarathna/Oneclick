@@ -47,13 +47,13 @@ export function LaunchCard({
     <Card title="Launch" icon="🧰">
       <div className="flex flex-col gap-2">
         <p className="text-xs uppercase tracking-wide text-zinc-500">Open project in editor</p>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-2 gap-2">
           {EDITORS.map((t) => button(t, "neutral"))}
         </div>
       </div>
       <div className="flex flex-col gap-2">
         <p className="text-xs uppercase tracking-wide text-zinc-500">AI coding CLIs (new terminal)</p>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-2">
           {AI_CLIS.map((t) => button(t, "primary"))}
         </div>
       </div>

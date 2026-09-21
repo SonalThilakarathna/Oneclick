@@ -52,14 +52,14 @@ export function Card({
 // ── Form fields ───────────────────────────────────────────────────────────
 
 export const inputClass =
-  "rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-indigo-500 focus:outline-none disabled:opacity-40";
+  "rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-brand-500 focus:outline-none disabled:opacity-40";
 
 // ── Buttons ───────────────────────────────────────────────────────────────
 
 type Variant = "primary" | "neutral" | "danger";
 
 const VARIANT: Record<Variant, string> = {
-  primary: "bg-indigo-600 text-white hover:bg-indigo-500",
+  primary: "bg-brand-600 text-white hover:bg-brand-500",
   neutral: "bg-zinc-800 text-zinc-100 hover:bg-zinc-700",
   danger: "bg-red-600/90 text-white hover:bg-red-500",
 };
@@ -72,7 +72,7 @@ export function ActionButton({
   return (
     <button
       type="button"
-      className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 disabled:cursor-not-allowed disabled:opacity-40 ${VARIANT[variant]} ${className}`}
+      className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 disabled:cursor-not-allowed disabled:opacity-40 ${VARIANT[variant]} ${className}`}
       {...props}
     />
   );
@@ -151,7 +151,7 @@ export function ConfirmDialog({
 
 
 const LOG_COLOR: Record<LogEntry["kind"], string> = {
-  cmd: "text-indigo-300",
+  cmd: "text-brand-300",
   stdout: "text-zinc-300",
   stderr: "text-amber-300",
   info: "text-zinc-500",
@@ -160,14 +160,16 @@ const LOG_COLOR: Record<LogEntry["kind"], string> = {
 };
 
 export function LogConsole({ log, onClear }: { log: LogEntry[]; onClear: () => void }) {
-  const endRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: "end" });
+    // Scroll only the log body; scrollIntoView would also scroll the page when it stacks on narrow windows.
+    const el = bodyRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [log]);
 
   return (
-    <section className="flex h-44 shrink-0 flex-col rounded-xl border border-zinc-800 bg-black/40">
+    <section className="flex h-56 shrink-0 flex-col rounded-xl border border-zinc-800 bg-black/40">
       <header className="flex items-center justify-between border-b border-zinc-800 px-4 py-2">
         <h2 className="text-sm font-semibold text-zinc-300">Output</h2>
         <button
@@ -178,7 +180,10 @@ export function LogConsole({ log, onClear }: { log: LogEntry[]; onClear: () => v
           Clear
         </button>
       </header>
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3 font-mono text-xs leading-5">
+      <div
+        ref={bodyRef}
+        className="min-h-0 flex-1 overflow-y-auto px-4 py-3 font-mono text-xs leading-5"
+      >
         {log.length === 0 ? (
           <p className="text-zinc-600">Command output will appear here.</p>
         ) : (
@@ -188,7 +193,6 @@ export function LogConsole({ log, onClear }: { log: LogEntry[]; onClear: () => v
             </div>
           ))
         )}
-        <div ref={endRef} />
       </div>
     </section>
   );

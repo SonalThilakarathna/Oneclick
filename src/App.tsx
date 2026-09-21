@@ -63,10 +63,10 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen flex-col gap-4 bg-zinc-950 p-5 text-zinc-200">
-      <header className="flex items-baseline justify-between">
+    <div className="flex min-h-screen flex-col gap-4 bg-zinc-950 p-4 text-zinc-200 lg:h-screen lg:p-5">
+      <header className="flex flex-wrap items-baseline justify-between gap-x-4">
         <h1 className="text-xl font-bold tracking-tight text-zinc-50">
-          One<span className="text-indigo-400">Click</span>
+          One<span className="text-brand-400">Click</span>
         </h1>
         <span className="text-xs text-zinc-500">Supabase · Git · Dev · Editors · AI CLIs · cURL</span>
       </header>
@@ -80,8 +80,9 @@ export default function App() {
 
       <ProjectBar projectDir={projectDir} onPick={choose} />
 
-      <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {/* Two columns from lg up (tools | command canvas); one stacked column below. */}
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[minmax(320px,380px)_minmax(0,1fr)]">
+        <aside aria-label="Tools" className="flex min-h-0 flex-col gap-4 lg:overflow-y-auto lg:pr-1">
           <SupabaseCard
             projectDir={projectDir}
             status={supabase.data}
@@ -100,17 +101,17 @@ export default function App() {
             runner={runner}
             onDone={refreshAll}
           />
-          <div className="md:col-span-1 xl:col-span-2 [&>section]:h-full">
-            <LaunchCard projectDir={projectDir} available={available} runner={runner} />
-          </div>
+          <LaunchCard projectDir={projectDir} available={available} runner={runner} />
           <ToolboxCard projectDir={projectDir} runner={runner} onDone={refreshAll} />
-          <div className="md:col-span-2 xl:col-span-3">
+        </aside>
+
+        <main aria-label="Command canvas" className="flex min-h-0 flex-col gap-4">
+          <div className="min-h-0 flex-1 lg:overflow-y-auto lg:pr-1">
             <CurlPanel projectDir={projectDir} runner={runner} />
           </div>
-        </div>
+          <LogConsole log={runner.log} onClear={runner.clear} />
+        </main>
       </div>
-
-      <LogConsole log={runner.log} onClear={runner.clear} />
     </div>
   );
 }
