@@ -8,14 +8,22 @@ import {
 import type { useCustomCommands } from "../hooks/useCustomCommands";
 import type { useRunner } from "../hooks/useRunner";
 import { IconBolt, IconPencil } from "./icons";
-import { ActionButton, Card, Modal, inputClass } from "./ui";
+import { ActionButton, Card, Modal, ConfirmDialog, inputClass } from "./ui";
 
 type Runner = ReturnType<typeof useRunner>;
 type Store = ReturnType<typeof useCustomCommands>;
 
 const MODES: { value: RunMode; label: string; hint: string }[] = [
-  { value: "output", label: "Output panel", hint: "Shows the result here. Best for commands that finish." },
-  { value: "terminal", label: "Terminal window", hint: "Opens its own window. Best for dev servers and watchers." },
+  {
+    value: "output",
+    label: "Output Panel",
+    hint: "Streams logs directly inside the workspace runner.",
+  },
+  {
+    value: "terminal",
+    label: "External Terminal",
+    hint: "Launches an interactive window for long-running processes.",
+  },
 ];
 
 function CommandDialog({
@@ -25,7 +33,6 @@ function CommandDialog({
   onDelete,
   onClose,
 }: {
-  /** The command being edited, or null when adding a new one. */
   initial: CustomCommand | null;
   projectDir: string | null;
   onSave: (command: CustomCommand) => void;
@@ -35,8 +42,10 @@ function CommandDialog({
   const [label, setLabel] = useState(initial?.label ?? "");
   const [command, setCommand] = useState(initial?.command ?? "");
   const [mode, setMode] = useState<RunMode>(initial?.mode ?? "output");
-  // New commands default to "this project": most repetitive commands are project-specific.
-  const [allProjects, setAllProjects] = useState(initial ? initial.dir === null : false);
+  const [allProjects, setAllProjects] = useState(
+    initial ? initial.dir === null : false
+  );
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const line = command.trim();
   const multiline = /[\r\n]/.test(line);
@@ -49,105 +58,128 @@ function CommandDialog({
       label: label.trim(),
       command: line,
       mode,
-      // An existing project-scoped command keeps its own folder when edited from another project.
       dir: allProjects ? null : (initial?.dir ?? projectDir),
     });
     onClose();
   };
 
   return (
-    <Modal title={initial ? "Edit command" : "Add a command"} onClose={onClose}>
-      <form
-        className="flex flex-col gap-3.5"
-        onSubmit={(e) => {
-          e.preventDefault();
-          submit();
-        }}
-      >
-        <label className="flex flex-col gap-1.5 text-xs font-medium text-zinc-400">
-          Button name
-          <input
-            autoFocus
-            className={inputClass}
-            placeholder="e.g. Run tests"
-            maxLength={40}
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-          />
-        </label>
+    <>
+      <Modal title={initial ? "Edit Command" : "New Command"} onClose={onClose}>
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            submit();
+          }}
+        >
+          <label className="flex flex-col gap-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+            Button Label
+            <input
+              autoFocus
+              className={inputClass}
+              placeholder="e.g. Run Tests"
+              maxLength={40}
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+            />
+          </label>
 
-        <label className="flex flex-col gap-1.5 text-xs font-medium text-zinc-400">
-          Command
-          <input
-            className={`${inputClass} font-mono`}
-            placeholder="e.g. npm test -- --watch=false"
-            spellCheck={false}
-            value={command}
-            onChange={(e) => setCommand(e.target.value)}
-          />
-          <span className="font-normal text-zinc-600">
-            Runs in the project folder. Chain steps with <code>&amp;&amp;</code>.
-          </span>
-        </label>
+          <label className="flex flex-col gap-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+            Shell Command
+            <input
+              className={`${inputClass} font-mono text-xs`}
+              placeholder="e.g. npm test -- --watch=false"
+              spellCheck={false}
+              value={command}
+              onChange={(e) => setCommand(e.target.value)}
+            />
+            <span className="text-[11px] font-normal normal-case text-zinc-500">
+              Executes relative to project root. Chain commands using <code>&amp;&amp;</code>.
+            </span>
+          </label>
 
-        <fieldset className="flex flex-col gap-1.5">
-          <legend className="mb-1.5 text-xs font-medium text-zinc-400">Run it in</legend>
-          {MODES.map((m) => (
-            <label
-              key={m.value}
-              className="flex cursor-pointer items-start gap-2.5 rounded-lg px-2 py-1.5 hover:bg-white/[0.03]"
-            >
-              <input
-                type="radio"
-                name="mode"
-                className="mt-0.5 accent-brand-500"
-                checked={mode === m.value}
-                onChange={() => setMode(m.value)}
-              />
-              <span className="text-xs text-zinc-300">
-                {m.label}
-                <span className="block text-zinc-600">{m.hint}</span>
-              </span>
-            </label>
-          ))}
-        </fieldset>
-
-        <label className="flex cursor-pointer items-center gap-2.5 px-1 text-xs text-zinc-400">
-          <input
-            type="checkbox"
-            className="accent-brand-500"
-            checked={allProjects}
-            onChange={(e) => setAllProjects(e.target.checked)}
-          />
-          Show in every project (otherwise only this one)
-        </label>
-
-        <div className="flex items-center justify-between gap-2 pt-1">
-          {initial ? (
-            <ActionButton
-              variant="ghost"
-              className="text-rose-400/80 hover:text-rose-300"
-              onClick={() => {
-                onDelete(initial.id);
-                onClose();
-              }}
-            >
-              Delete
-            </ActionButton>
-          ) : (
-            <span />
-          )}
-          <div className="flex gap-2">
-            <ActionButton variant="ghost" onClick={onClose}>
-              Cancel
-            </ActionButton>
-            <ActionButton variant="primary" type="submit" disabled={!valid}>
-              Save
-            </ActionButton>
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+              Target Runner
+            </span>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {MODES.map((m) => {
+                const isSelected = mode === m.value;
+                return (
+                  <button
+                    key={m.value}
+                    type="button"
+                    onClick={() => setMode(m.value)}
+                    className={`flex flex-col items-start gap-1 rounded-xl p-3 text-left transition-all ring-1 ${
+                      isSelected
+                        ? "bg-brand-500/10 ring-brand-500/40 text-white"
+                        : "bg-[#0e0e0e] ring-white/[0.06] text-zinc-400 hover:bg-white/[0.03]"
+                    }`}
+                  >
+                    <div className="flex w-full items-center justify-between">
+                      <span className="text-xs font-semibold">{m.label}</span>
+                      {isSelected && (
+                        <span className="h-2 w-2 rounded-full bg-brand-500 shadow-[0_0_6px_rgba(140,250,16,0.8)]" />
+                      )}
+                    </div>
+                    <span className="text-[11px] leading-snug text-zinc-500">
+                      {m.hint}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </form>
-    </Modal>
+
+          <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-zinc-400 select-none">
+            <input
+              type="checkbox"
+              className="h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-900 accent-brand-500 focus:ring-0"
+              checked={allProjects}
+              onChange={(e) => setAllProjects(e.target.checked)}
+            />
+            Make command available across all projects
+          </label>
+
+          <div className="flex items-center justify-between border-t border-white/[0.06] pt-3.5">
+            {initial ? (
+              <ActionButton
+                variant="ghost"
+                className="text-rose-400 hover:text-rose-300"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                Delete
+              </ActionButton>
+            ) : (
+              <span />
+            )}
+            <div className="flex items-center gap-2">
+              <ActionButton variant="ghost" onClick={onClose}>
+                Cancel
+              </ActionButton>
+              <ActionButton variant="primary" type="submit" disabled={!valid}>
+                Save Command
+              </ActionButton>
+            </div>
+          </div>
+        </form>
+      </Modal>
+
+      {showDeleteConfirm && initial && (
+        <ConfirmDialog
+          title="Delete Command"
+          body={`Are you sure you want to remove "${initial.label}"? This action cannot be undone.`}
+          confirmLabel="Delete"
+          danger
+          onConfirm={() => {
+            onDelete(initial.id);
+            onClose();
+          }}
+          onClose={() => setShowDeleteConfirm(false)}
+        />
+      )}
+    </>
   );
 }
 
@@ -162,8 +194,9 @@ export function CustomCommandsCard({
   runner: Runner;
   onDone: () => void;
 }) {
-  // `undefined` = dialog closed, `null` = adding, otherwise editing that command.
-  const [editing, setEditing] = useState<CustomCommand | null | undefined>(undefined);
+  const [editing, setEditing] = useState<CustomCommand | null | undefined>(
+    undefined
+  );
   const visible = commandsForProject(store.commands, projectDir);
   const disabled = !projectDir || runner.busy !== null;
 
@@ -171,9 +204,13 @@ export function CustomCommandsCard({
     if (!projectDir) return;
     const label = `Custom: ${c.label}`;
     if (c.mode === "terminal") {
-      await runner.run(label, () => api.customRunTerminal(c.command, projectDir));
+      await runner.run(label, () =>
+        api.customRunTerminal(c.command, projectDir)
+      );
     } else {
-      await runner.run(label, (runId) => api.customRun(c.command, projectDir, runId));
+      await runner.run(label, (runId) =>
+        api.customRun(c.command, projectDir, runId)
+      );
     }
     onDone();
   };
@@ -184,42 +221,70 @@ export function CustomCommandsCard({
       icon={<IconBolt />}
       iconTone="accent"
       status={
-        <ActionButton
-          variant="ghost"
-          size="sm"
-          disabled={!projectDir}
-          onClick={() => setEditing(null)}
-        >
-          + Add
-        </ActionButton>
+        visible.length > 0 && (
+          <ActionButton
+            variant="ghost"
+            size="sm"
+            disabled={!projectDir}
+            onClick={() => setEditing(null)}
+          >
+            + Add
+          </ActionButton>
+        )
       }
     >
       {visible.length === 0 ? (
-        <p className="text-xs leading-relaxed text-zinc-500">
-          Save the commands you keep retyping (tests, lint, deploy scripts…) as one-click buttons.
-        </p>
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-white/10 p-5 text-center">
+          <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500/10 text-brand-500">
+            <IconBolt />
+          </div>
+          <p className="text-xs font-semibold text-zinc-300">No Custom Commands</p>
+          <p className="mt-1 max-w-[220px] text-[11px] leading-relaxed text-zinc-500">
+            Save repetitive scripts (build, test, deploy) as one-click action buttons.
+          </p>
+          <ActionButton
+            variant="soft"
+            size="sm"
+            className="mt-3"
+            disabled={!projectDir}
+            onClick={() => setEditing(null)}
+          >
+            + Add Command
+          </ActionButton>
+        </div>
       ) : (
         <div className="flex flex-col gap-1.5">
           {visible.map((c) => (
-            <div key={c.id} className="group flex items-center gap-1">
+            <div key={c.id} className="group flex items-center gap-1.5">
               <ActionButton
                 variant="soft"
-                size="sm"
-                className="min-w-0 flex-1 justify-start px-2.5"
+                size="md"
+                className="group/btn relative min-w-0 flex-1 justify-between px-3 py-2 text-left transition-all hover:bg-white/[0.08]"
                 disabled={disabled}
                 title={c.command}
                 onClick={() => run(c)}
               >
-                <span className="truncate">{c.label}</span>
-                {c.dir === null && (
-                  <span className="ml-2 shrink-0 text-[10px] font-normal text-zinc-600">all projects</span>
-                )}
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="truncate text-xs font-medium text-zinc-200">
+                    {c.label}
+                  </span>
+                  {c.dir === null && (
+                    <span className="shrink-0 rounded bg-white/[0.06] px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-zinc-500">
+                      Global
+                    </span>
+                  )}
+                </div>
+                <span className="max-w-[130px] shrink-0 truncate font-mono text-[10px] text-zinc-500 opacity-0 transition-opacity group-hover/btn:opacity-100">
+                  {c.command}
+                </span>
               </ActionButton>
+
               <ActionButton
                 variant="ghost"
                 size="sm"
                 aria-label={`Edit ${c.label}`}
-                title="Edit"
+                title="Edit command"
+                className="opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={() => setEditing(c)}
               >
                 <IconPencil size={13} />

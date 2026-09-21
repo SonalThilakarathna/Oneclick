@@ -12,9 +12,28 @@ import {
 } from "../lib/curlTemplates";
 import type { useRunner } from "../hooks/useRunner";
 import { IconRequest } from "./icons";
-import { ActionButton, ActionRow, Card, TextArea, inputClass } from "./ui";
+import {
+  ActionButton,
+  ActionRow,
+  Card,
+  ConfirmDialog,
+  TextArea,
+  inputClass,
+} from "./ui";
 
 type Runner = ReturnType<typeof useRunner>;
+
+// ── Method Color Helpers ──────────────────────────────────────────────────
+
+const METHOD_COLOR: Record<string, string> = {
+  GET: "text-emerald-400",
+  POST: "text-brand-400 font-semibold",
+  PUT: "text-amber-400",
+  PATCH: "text-amber-300",
+  DELETE: "text-rose-400 font-semibold",
+  HEAD: "text-sky-400",
+  OPTIONS: "text-purple-400",
+};
 
 export function CurlPanel({
   projectDir,
@@ -24,17 +43,19 @@ export function CurlPanel({
   runner: Runner;
 }) {
   const [saved, setSaved] = useState<CurlTemplate[]>(loadSaved);
-  const [selectedId, setSelectedId] = useState(PRESETS[0].id);
+  const [selectedId, setSelectedId] = useState<string>(PRESETS[0].id);
   const [draft, setDraft] = useState<CurlTemplate>(PRESETS[0]);
   const [copied, setCopied] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const isSaved = saved.some((s) => s.id === selectedId);
   const request = useMemo(() => toRequest(draft), [draft]);
   const command = useMemo(() => toCurlCommand(request), [request]);
   const placeholders = hasPlaceholders(draft);
-  const noBody = draft.method === "HEAD";
+  const noBody = draft.method === "HEAD" || draft.method === "GET";
 
-  const patch = (changes: Partial<CurlTemplate>) => setDraft((d) => ({ ...d, ...changes }));
+  const patch = (changes: Partial<CurlTemplate>) =>
+    setDraft((d) => ({ ...d, ...changes }));
 
   const select = (id: string) => {
     const tpl = [...PRESETS, ...saved].find((t) => t.id === id);
@@ -46,8 +67,9 @@ export function CurlPanel({
   const send = async (e: FormEvent) => {
     e.preventDefault();
     if (!projectDir) return;
-    await runner.run(`cURL: ${draft.method} ${draft.url.trim() || "(no URL)"}`, (runId) =>
-      api.curlRequest(request, projectDir, runId),
+    await runner.run(
+      `cURL: ${draft.method} ${draft.url.trim() || "(no URL)"}`,
+      (runId) => api.curlRequest(request, projectDir, runId),
     );
   };
 
@@ -57,15 +79,26 @@ export function CurlPanel({
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1500);
     } catch {
-      runner.push("err", "Could not access the clipboard. Select the command and copy it manually.");
+      runner.push(
+        "err",
+        "Could not access the clipboard. Select the command and copy it manually.",
+      );
     }
   };
 
   const save = () => {
-    const name = window.prompt("Template name", isSaved ? draft.name : "My request")?.trim();
+    const name = window
+      .prompt("Template name", isSaved ? draft.name : "My request")
+      ?.trim();
     if (!name) return;
-    const tpl: CurlTemplate = { ...draft, name, id: isSaved ? selectedId : `saved-${Date.now()}` };
-    const next = isSaved ? saved.map((s) => (s.id === tpl.id ? tpl : s)) : [...saved, tpl];
+    const tpl: CurlTemplate = {
+      ...draft,
+      name,
+      id: isSaved ? selectedId : `saved-${Date.now()}`,
+    };
+    const next = isSaved
+      ? saved.map((s) => (s.id === tpl.id ? tpl : s))
+      : [...saved, tpl];
     setSaved(next);
     persistSaved(next);
     setSelectedId(tpl.id);
@@ -76,139 +109,193 @@ export function CurlPanel({
     const next = saved.filter((s) => s.id !== selectedId);
     setSaved(next);
     persistSaved(next);
+    setShowDeleteConfirm(false);
     select(PRESETS[0].id);
   };
 
   return (
-    <Card title="cURL Templates" icon={<IconRequest />} iconTone="request" className="h-full">
-      <form onSubmit={send} className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="text-[10px] font-medium uppercase tracking-[0.1em] text-zinc-600" htmlFor="curl-template">
-            Template
-          </label>
-          <select
-            id="curl-template"
-            value={selectedId}
-            onChange={(e) => select(e.target.value)}
-            className={`${inputClass} min-w-0 flex-1`}
-          >
-            <optgroup label="Built-in">
-              {PRESETS.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
+    <>
+      <Card
+        title="cURL Workspace"
+        icon={<IconRequest />}
+        iconTone="request"
+        className="h-full"
+      >
+        <form onSubmit={send} className="flex flex-col gap-4">
+          {/* Template Bar */}
+          <div className="flex items-center justify-between gap-3 border-b border-white/[0.04] pb-3">
+            <div className="flex min-w-0 flex-1 items-center gap-2">
+              <label
+                className="text-[10px] font-semibold uppercase tracking-[0.1em] text-zinc-500"
+                htmlFor="curl-template"
+              >
+                Template
+              </label>
+              <select
+                id="curl-template"
+                value={selectedId}
+                onChange={(e) => select(e.target.value)}
+                className={`${inputClass} min-w-0 flex-1 py-1.5 text-xs font-medium`}
+              >
+                <optgroup label="Presets">
+                  {PRESETS.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                    </option>
+                  ))}
+                </optgroup>
+                {saved.length > 0 && (
+                  <optgroup label="Saved Templates">
+                    {saved.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+              </select>
+            </div>
+
+            <ActionRow>
+              <ActionButton variant="soft" size="sm" onClick={save}>
+                {isSaved ? "Update" : "Save as..."}
+              </ActionButton>
+              {isSaved && (
+                <ActionButton
+                  variant="ghost"
+                  size="sm"
+                  className="text-rose-400 hover:text-rose-300"
+                  onClick={() => setShowDeleteConfirm(true)}
+                >
+                  Delete
+                </ActionButton>
+              )}
+            </ActionRow>
+          </div>
+
+          {/* Request Address Bar */}
+          <div className="flex items-center gap-2">
+            <select
+              aria-label="HTTP method"
+              value={draft.method}
+              onChange={(e) => patch({ method: e.target.value })}
+              className={`${inputClass} w-28 font-mono text-xs ${
+                METHOD_COLOR[draft.method] || "text-zinc-200"
+              }`}
+            >
+              {METHODS.map((m) => (
+                <option key={m} className="bg-[#121212] text-zinc-200" value={m}>
+                  {m}
                 </option>
               ))}
-            </optgroup>
-            {saved.length > 0 && (
-              <optgroup label="Saved">
-                {saved.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </optgroup>
-            )}
-          </select>
-        </div>
+            </select>
 
-        <div className="flex flex-wrap gap-2">
-          <select
-            aria-label="HTTP method"
-            value={draft.method}
-            onChange={(e) => patch({ method: e.target.value })}
-            className={`${inputClass} w-24 font-mono text-xs`}
-          >
-            {METHODS.map((m) => (
-              <option key={m}>{m}</option>
-            ))}
-          </select>
-          <input
-            aria-label="URL"
-            value={draft.url}
-            onChange={(e) => patch({ url: e.target.value })}
-            placeholder="https://api.example.com/resource"
-            spellCheck={false}
-            className={`${inputClass} min-w-0 flex-1 font-mono text-xs`}
-          />
-          <ActionButton
-            type="submit"
-            variant="primary"
-            size="lg"
-            disabled={!projectDir || runner.busy !== null || !draft.url.trim()}
-          >
-            Send
-          </ActionButton>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <label className="flex flex-col gap-1.5 text-[10px] font-medium uppercase tracking-[0.1em] text-zinc-600">
-            Headers
-            <TextArea
-              value={draft.headers}
-              onChange={(e) => patch({ headers: e.target.value })}
-              rows={5}
+            <input
+              aria-label="URL"
+              value={draft.url}
+              onChange={(e) => patch({ url: e.target.value })}
+              placeholder="https://api.example.com/v1/resource"
               spellCheck={false}
-              placeholder="Name: value"
-              className="font-mono text-xs normal-case tracking-normal text-zinc-400"
+              className={`${inputClass} min-w-0 flex-1 font-mono text-xs`}
             />
-          </label>
-          <label className="flex flex-col gap-1.5 text-[10px] font-medium uppercase tracking-[0.1em] text-zinc-600">
-            Body
-            <TextArea
-              value={noBody ? "" : draft.body}
-              onChange={(e) => patch({ body: e.target.value })}
-              rows={5}
-              disabled={noBody}
-              spellCheck={false}
-              placeholder={noBody ? "HEAD requests have no body" : '{ "key": "value" }'}
-              className="font-mono text-xs normal-case tracking-normal text-zinc-400"
-            />
-          </label>
-        </div>
 
-        <label className="flex items-center gap-2 text-sm text-zinc-500">
-          <input
-            type="checkbox"
-            checked={draft.followRedirects}
-            onChange={(e) => patch({ followRedirects: e.target.checked })}
-            className="accent-brand-500"
-          />
-          Follow redirects (max 5)
-        </label>
-
-        {placeholders && (
-          <p className="rounded-lg bg-amber-500/8 px-3 py-2 text-xs text-amber-300/90 ring-1 ring-inset ring-amber-500/20">
-            This template contains <code>YOUR_…</code> placeholders. Replace them before sending.
-          </p>
-        )}
-
-        <div className="flex flex-col gap-2.5">
-          <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-zinc-600">
-            Copy-paste command
-          </p>
-          <pre className="max-h-32 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-black/30 p-3 font-mono text-[11px] leading-relaxed text-zinc-500">
-            {command}
-          </pre>
-          <ActionRow>
-            <ActionButton variant="outline" size="sm" onClick={copy}>
-              {copied ? "Copied" : "Copy command"}
+            <ActionButton
+              type="submit"
+              variant="primary"
+              size="md"
+              disabled={!projectDir || runner.busy !== null || !draft.url.trim()}
+            >
+              Send
             </ActionButton>
-            <ActionButton variant="ghost" size="sm" onClick={save}>
-              {isSaved ? "Update template" : "Save as template"}
-            </ActionButton>
-            {isSaved && (
-              <ActionButton variant="ghost" size="sm" className="text-rose-400/80" onClick={remove}>
-                Delete
-              </ActionButton>
+          </div>
+
+          {/* Headers & Body Area */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <label className="flex flex-col gap-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-zinc-500">
+              Headers
+              <TextArea
+                value={draft.headers}
+                onChange={(e) => patch({ headers: e.target.value })}
+                rows={4}
+                spellCheck={false}
+                placeholder="Accept: application/json&#10;Authorization: Bearer YOUR_TOKEN"
+                className="font-mono text-xs text-zinc-300"
+              />
+            </label>
+
+            <label className="flex flex-col gap-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-zinc-500">
+              Body
+              <TextArea
+                value={noBody ? "" : draft.body}
+                onChange={(e) => patch({ body: e.target.value })}
+                rows={4}
+                disabled={noBody}
+                spellCheck={false}
+                placeholder={
+                  noBody
+                    ? `${draft.method} requests typically carry no body`
+                    : '{\n  "key": "value"\n}'
+                }
+                className="font-mono text-xs text-zinc-300 disabled:opacity-30"
+              />
+            </label>
+          </div>
+
+          {/* Options & Placeholders */}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <label className="inline-flex items-center gap-2 text-xs text-zinc-400 select-none">
+              <input
+                type="checkbox"
+                checked={draft.followRedirects}
+                onChange={(e) => patch({ followRedirects: e.target.checked })}
+                className="h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-900 accent-brand-500 focus:ring-0"
+              />
+              Follow redirects (max 5)
+            </label>
+
+            {placeholders && (
+              <span className="rounded-md bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-300 ring-1 ring-inset ring-amber-500/20">
+                Replace <code>YOUR_…</code> placeholders before sending
+              </span>
             )}
-          </ActionRow>
-          <p className="text-[11px] leading-relaxed text-zinc-600">
-            Saved templates live unencrypted in this app’s local storage. Keep placeholders such as{" "}
-            <code>YOUR_TOKEN</code> in them, not real secrets. Only http(s) is allowed and requests time
-            out after 30 s.
+          </div>
+
+          {/* cURL Command Output Snippet */}
+          <div className="flex flex-col gap-2 rounded-xl bg-[#0e0e0e] p-3 ring-1 ring-white/[0.06]">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-zinc-500">
+                Generated cURL Command
+              </span>
+              <button
+                type="button"
+                onClick={copy}
+                className="text-[11px] font-medium text-brand-400 hover:text-brand-300 transition-colors"
+              >
+                {copied ? "Copied to clipboard!" : "Copy command"}
+              </button>
+            </div>
+            <pre className="max-h-28 overflow-auto whitespace-pre-wrap break-all font-mono text-[11px] leading-relaxed text-zinc-400 selection:bg-brand-500/20 selection:text-brand-300">
+              {command}
+            </pre>
+          </div>
+
+          <p className="text-[10px] leading-relaxed text-zinc-600">
+            Saved templates reside in local storage. Avoid storing raw production API keys. Requests timeout after 30 seconds.
           </p>
-        </div>
-      </form>
-    </Card>
+        </form>
+      </Card>
+
+      {/* Delete Template Modal */}
+      {showDeleteConfirm && (
+        <ConfirmDialog
+          title="Delete Template"
+          body={`Are you sure you want to delete "${draft.name}"? This action cannot be undone.`}
+          confirmLabel="Delete"
+          danger
+          onConfirm={remove}
+          onClose={() => setShowDeleteConfirm(false)}
+        />
+      )}
+    </>
   );
 }

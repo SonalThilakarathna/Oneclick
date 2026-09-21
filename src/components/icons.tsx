@@ -1,128 +1,142 @@
-import type { SVGProps, ReactNode } from "react";
+import type { SVGProps } from "react";
+import {
+  DatabaseZap,
+  GitGraph,
+  SquareTerminal,
+  ArrowUpRight,
+  SlidersHorizontal,
+  TerminalSquare,
+  SquarePen,
+  Webhook,
+  FolderCode,
+  type LucideProps,
+} from "lucide-react";
 
-type IconProps = SVGProps<SVGSVGElement> & { size?: number };
+export type IconProps = SVGProps<SVGSVGElement> & {
+  size?: number | string;
+};
 
-function Icon({
-  size = 16,
-  children,
-  className = "",
-  ...rest
-}: IconProps & { children: ReactNode }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={`shrink-0 ${className}`}
-      aria-hidden
-      {...rest}
-    >
-      {children}
-    </svg>
-  );
-}
+// Common Lucide config to maintain consistent styling across the application
+const ICON_DEFAULTS: LucideProps = {
+  strokeWidth: 1.75,
+};
 
 /** Stack / database mark — Supabase section */
-export function IconStack(props: IconProps) {
+export function IconStack({ size = 16, className = "", ...props }: IconProps) {
   return (
-    <Icon {...props}>
-      <ellipse cx="12" cy="5" rx="8" ry="3" />
-      <path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5" />
-      <path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6" />
-    </Icon>
+    <DatabaseZap
+      size={size}
+      className={`shrink-0 ${className}`}
+      {...ICON_DEFAULTS}
+      {...props}
+    />
   );
 }
 
 /** Branch mark — Git section */
-export function IconBranch(props: IconProps) {
+export function IconBranch({ size = 16, className = "", ...props }: IconProps) {
   return (
-    <Icon {...props}>
-      <circle cx="6" cy="5" r="2.25" />
-      <circle cx="18" cy="5" r="2.25" />
-      <circle cx="12" cy="19" r="2.25" />
-      <path d="M6 7.25v4.5c0 1.5 1.5 2.75 3.5 2.75H12" />
-      <path d="M18 7.25v2.5c0 1.5-1.5 2.75-3.5 2.75H12v4" />
-    </Icon>
+    <GitGraph
+      size={size}
+      className={`shrink-0 ${className}`}
+      {...ICON_DEFAULTS}
+      {...props}
+    />
   );
 }
 
 /** Play / process mark — Dev Server */
-export function IconPlay(props: IconProps) {
+export function IconPlay({ size = 16, className = "", ...props }: IconProps) {
   return (
-    <Icon {...props}>
-      <rect x="3.5" y="4" width="17" height="16" rx="2.5" />
-      <path d="M10 9.5v5l5-2.5-5-2.5z" fill="currentColor" stroke="none" />
-    </Icon>
+    <SquareTerminal
+      size={size}
+      className={`shrink-0 ${className}`}
+      {...ICON_DEFAULTS}
+      {...props}
+    />
   );
 }
 
 /** External launch mark */
-export function IconLaunch(props: IconProps) {
+export function IconLaunch({ size = 16, className = "", ...props }: IconProps) {
   return (
-    <Icon {...props}>
-      <path d="M14 4h6v6" />
-      <path d="M10 14 20 4" />
-      <path d="M20 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h5" />
-    </Icon>
+    <ArrowUpRight
+      size={size}
+      className={`shrink-0 ${className}`}
+      {...ICON_DEFAULTS}
+      {...props}
+    />
   );
 }
 
 /** Wrench / helpers mark — Toolbox */
-export function IconWrench(props: IconProps) {
+export function IconWrench({ size = 16, className = "", ...props }: IconProps) {
   return (
-    <Icon {...props}>
-      <path d="M14.7 6.3a4.5 4.5 0 0 0-6.1 5.2L4 16.1V20h3.9l4.6-4.6a4.5 4.5 0 0 0 5.2-6.1l-2.5 2.5-2.5-2.5 2-2z" />
-    </Icon>
+    <SlidersHorizontal
+      size={size}
+      className={`shrink-0 ${className}`}
+      {...ICON_DEFAULTS}
+      {...props}
+    />
   );
 }
 
-/** Bolt mark — custom commands */
-export function IconBolt(props: IconProps) {
+/** Bolt / runner mark — Custom commands */
+export function IconBolt({ size = 16, className = "", ...props }: IconProps) {
   return (
-    <Icon {...props}>
-      <path d="M13 3 5 13.5h6L10 21l8-10.5h-6L13 3z" />
-    </Icon>
+    <TerminalSquare
+      size={size}
+      className={`shrink-0 ${className}`}
+      {...ICON_DEFAULTS}
+      {...props}
+    />
   );
 }
 
-/** Pencil mark — edit */
-export function IconPencil(props: IconProps) {
+/** Pencil / edit mark */
+export function IconPencil({ size = 16, className = "", ...props }: IconProps) {
   return (
-    <Icon {...props}>
-      <path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3z" />
-      <path d="m14.5 7.5 2 2" />
-    </Icon>
+    <SquarePen
+      size={size}
+      className={`shrink-0 ${className}`}
+      {...ICON_DEFAULTS}
+      {...props}
+    />
   );
 }
 
-/** Request / terminal mark — cURL */
-export function IconRequest(props: IconProps) {
+/** Request / HTTP mark — cURL panel */
+export function IconRequest({ size = 16, className = "", ...props }: IconProps) {
   return (
-    <Icon {...props}>
-      <path d="M4 7h16" />
-      <path d="M4 12h10" />
-      <path d="M4 17h7" />
-      <path d="M16 14.5 20 12l-4-2.5V14.5z" fill="currentColor" stroke="none" />
-    </Icon>
+    <Webhook
+      size={size}
+      className={`shrink-0 ${className}`}
+      {...ICON_DEFAULTS}
+      {...props}
+    />
   );
 }
 
-/** Folder mark — project picker */
-export function IconFolder(props: IconProps) {
+/** Folder mark — Project workspace */
+export function IconFolder({ size = 16, className = "", ...props }: IconProps) {
   return (
-    <Icon {...props}>
-      <path d="M3.5 8.5A1.5 1.5 0 0 1 5 7h4.2l1.6 1.8H19a1.5 1.5 0 0 1 1.5 1.5V18A1.5 1.5 0 0 1 19 19.5H5A1.5 1.5 0 0 1 3.5 18V8.5z" />
-    </Icon>
+    <FolderCode
+      size={size}
+      className={`shrink-0 ${className}`}
+      {...ICON_DEFAULTS}
+      {...props}
+    />
   );
 }
 
-/** Brand mark — concentric target (matches desktop icon). Lime is hardcoded so it never inherits wrong. */
-export function LogoMark({ size = 22, className = "" }: { size?: number; className?: string }) {
+/** Brand mark — Target logo mark (hardcoded brand colors) */
+export function LogoMark({
+  size = 22,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
     <svg
       width={size}
@@ -132,7 +146,14 @@ export function LogoMark({ size = 22, className = "" }: { size?: number; classNa
       aria-hidden
     >
       <rect width="32" height="32" rx="8" fill="#b9de07" />
-      <circle cx="16" cy="16" r="9" fill="none" stroke="#0b0b0b" strokeWidth="3.2" />
+      <circle
+        cx="16"
+        cy="16"
+        r="9"
+        fill="none"
+        stroke="#0b0b0b"
+        strokeWidth="3.2"
+      />
       <circle cx="16" cy="16" r="3.6" fill="#0b0b0b" />
     </svg>
   );
