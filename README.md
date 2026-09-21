@@ -13,6 +13,9 @@ Supabase · Git · Dev servers · VS Code / Cursor / Antigravity · Claude Code 
 ![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 ![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
+
+
+
 <img src="docs/screenshot.png" alt="OneClick dashboard: Supabase, Git, Dev Server, Launch, Toolbox and cURL Templates cards" width="900">
 
 <sub>UI preview rendered in a browser. In the desktop app every button is live.</sub>
