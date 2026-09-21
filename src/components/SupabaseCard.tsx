@@ -50,38 +50,50 @@ function FunctionsDialog({
       return next;
     });
 
-  const allSelected = names !== null && names.length > 0 && selected.size === names.length;
+  const allSelected =
+    names !== null && names.length > 0 && selected.size === names.length;
+
   const start = (fns: string[]) => {
     onClose();
     onDeploy(fns);
   };
 
   return (
-    <Modal title="Deploy edge functions" onClose={onClose}>
+    <Modal title="Deploy Edge Functions" onClose={onClose}>
       {error ? (
-        <p className="mb-4 text-sm text-rose-400">{error}</p>
+        <p className="mb-4 text-xs font-medium text-rose-400">{error}</p>
       ) : names === null ? (
-        <p className="mb-4 text-sm text-zinc-500">Loading functions…</p>
+        <p className="mb-4 text-xs text-zinc-500">Loading edge functions…</p>
       ) : names.length === 0 ? (
-        <p className="mb-4 text-sm text-zinc-500">No edge functions found in supabase/functions.</p>
+        <p className="mb-4 text-xs text-zinc-500">
+          No edge functions found in <code>supabase/functions</code>.
+        </p>
       ) : (
         <>
-          <label className="mb-1 flex cursor-pointer items-center gap-2.5 px-1 py-1.5 text-xs font-medium text-zinc-400">
-            <input
-              type="checkbox"
-              className="accent-brand-500"
-              checked={allSelected}
-              onChange={() => setSelected(allSelected ? new Set() : new Set(names))}
-            />
-            Select all ({names.length})
-          </label>
-          <ul className="mb-4 max-h-56 overflow-y-auto rounded-lg bg-[#0e0e0e] py-1 ring-1 ring-inset ring-white/[0.06]">
+          <div className="mb-2 flex items-center justify-between px-1">
+            <label className="flex cursor-pointer items-center gap-2 text-xs font-semibold text-zinc-300 select-none">
+              <input
+                type="checkbox"
+                className="h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-900 accent-brand-500 focus:ring-0"
+                checked={allSelected}
+                onChange={() =>
+                  setSelected(allSelected ? new Set() : new Set(names))
+                }
+              />
+              Select All
+            </label>
+            <span className="text-[11px] text-zinc-500">
+              {selected.size} of {names.length} selected
+            </span>
+          </div>
+
+          <ul className="mb-4 max-h-56 overflow-y-auto rounded-xl bg-[#0e0e0e] py-1 ring-1 ring-white/[0.08]">
             {names.map((name) => (
               <li key={name}>
-                <label className="flex cursor-pointer items-center gap-2.5 px-3 py-1.5 font-mono text-xs text-zinc-300 hover:bg-white/[0.03]">
+                <label className="flex cursor-pointer items-center gap-2.5 px-3 py-1.5 font-mono text-xs text-zinc-300 transition-colors hover:bg-white/[0.04]">
                   <input
                     type="checkbox"
-                    className="accent-brand-500"
+                    className="h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-900 accent-brand-500 focus:ring-0"
                     checked={selected.has(name)}
                     onChange={() => toggle(name)}
                   />
@@ -92,24 +104,29 @@ function FunctionsDialog({
           </ul>
         </>
       )}
-      <div className="flex flex-wrap justify-end gap-2">
-        <ActionButton variant="ghost" onClick={onClose}>
+
+      <div className="flex items-center justify-between border-t border-white/[0.06] pt-3.5">
+        <ActionButton variant="ghost" size="sm" onClick={onClose}>
           Cancel
         </ActionButton>
-        <ActionButton
-          variant="outline"
-          disabled={!names?.length}
-          onClick={() => start([])}
-        >
-          Deploy all
-        </ActionButton>
-        <ActionButton
-          variant="primary"
-          disabled={selected.size === 0}
-          onClick={() => start(names!.filter((n) => selected.has(n)))}
-        >
-          Deploy selected{selected.size > 0 ? ` (${selected.size})` : ""}
-        </ActionButton>
+        <div className="flex items-center gap-2">
+          <ActionButton
+            variant="outline"
+            size="sm"
+            disabled={!names?.length}
+            onClick={() => start([])}
+          >
+            Deploy All
+          </ActionButton>
+          <ActionButton
+            variant="primary"
+            size="sm"
+            disabled={selected.size === 0}
+            onClick={() => start(names!.filter((n) => selected.has(n)))}
+          >
+            Deploy Selected {selected.size > 0 ? `(${selected.size})` : ""}
+          </ActionButton>
+        </div>
       </div>
     </Modal>
   );
@@ -126,12 +143,16 @@ export function SupabaseCard({
   runner: Runner;
   onDone: () => void;
 }) {
-  const [confirm, setConfirm] = useState<"reset" | "deploy" | "functions" | null>(null);
+  const [confirm, setConfirm] = useState<
+    "reset" | "deploy" | "functions" | null
+  >(null);
   const disabled = !projectDir || runner.busy !== null;
 
   const run = async (action: SupabaseAction) => {
     if (!projectDir) return;
-    await runner.run(LABELS[action], (runId) => api.supabaseRun(action, projectDir, runId));
+    await runner.run(LABELS[action], (runId) =>
+      api.supabaseRun(action, projectDir, runId)
+    );
     onDone();
   };
 
@@ -141,20 +162,21 @@ export function SupabaseCard({
       ? `Supabase: Deploy ${functions.length} Function(s)`
       : "Supabase: Deploy All Functions";
     await runner.run(label, (runId) =>
-      api.supabaseFunctionsDeploy(functions, projectDir, runId),
+      api.supabaseFunctionsDeploy(functions, projectDir, runId)
     );
     onDone();
   };
 
   const busyHere = runner.busy?.startsWith("Supabase");
-  const dot: DotState = busyHere ? "busy" : (status?.state ?? "unknown");
+  const isRunning = status?.state === "running";
+  const dot: DotState = busyHere ? "busy" : status?.state ?? "unknown";
   const label = busyHere
     ? "Working…"
-    : status?.state === "running"
-      ? "Running"
-      : status?.state === "stopped"
-        ? "Stopped"
-        : "Unknown";
+    : isRunning
+    ? "Running"
+    : status?.state === "stopped"
+    ? "Stopped"
+    : "Unknown";
 
   return (
     <Card
@@ -164,60 +186,94 @@ export function SupabaseCard({
       status={<StatusDot state={dot} label={label} />}
     >
       <p className="text-xs leading-relaxed text-zinc-500">
-        {status?.detail ?? "Local stack via the Supabase CLI and Docker."}
+        {status?.detail ?? "Local stack managed via Supabase CLI & Docker."}
       </p>
+
+      {/* Primary Stack Actions */}
       <ActionRow>
-        <ActionButton
-          variant="success"
-          size="lg"
-          className="min-w-[7.5rem] flex-1"
-          disabled={disabled}
-          onClick={() => run("start")}
-        >
-          Start Local
-        </ActionButton>
-        <ActionButton variant="outline" size="sm" disabled={disabled} onClick={() => run("stop")}>
-          Stop
-        </ActionButton>
+        {isRunning ? (
+          <>
+            <ActionButton
+              variant="outline"
+              size="md"
+              className="flex-1 border-rose-500/20 text-rose-400 hover:bg-rose-500/10 hover:text-rose-300"
+              disabled={disabled}
+              onClick={() => run("stop")}
+            >
+              Stop Stack
+            </ActionButton>
+            <ActionButton
+              variant="soft"
+              size="md"
+              className="flex-1"
+              disabled={disabled}
+              onClick={() => run("start")}
+            >
+              Restart
+            </ActionButton>
+          </>
+        ) : (
+          <ActionButton
+            variant="success"
+            size="md"
+            className="w-full justify-center font-medium shadow-sm"
+            disabled={disabled}
+            onClick={() => run("start")}
+          >
+            Start Local Stack
+          </ActionButton>
+        )}
       </ActionRow>
+
+      {/* Remote & Function Deployment Actions */}
       <ActionRow>
         <ActionButton
-          variant="ghost"
+          variant="soft"
           size="sm"
-          disabled={disabled}
-          onClick={() => setConfirm("deploy")}
-        >
-          Deploy to Remote
-        </ActionButton>
-        <ActionButton
-          variant="ghost"
-          size="sm"
+          className="flex-1 justify-center"
           disabled={disabled}
           onClick={() => setConfirm("functions")}
         >
           Deploy Functions…
         </ActionButton>
         <ActionButton
+          variant="soft"
+          size="sm"
+          className="flex-1 justify-center"
+          disabled={disabled}
+          onClick={() => setConfirm("deploy")}
+        >
+          Deploy Remote
+        </ActionButton>
+      </ActionRow>
+
+      {/* Database Maintenance Section */}
+      <div className="mt-1 flex items-center justify-between border-t border-white/[0.06] pt-2.5">
+        <span className="text-[11px] font-medium text-zinc-500">
+          Database Tools
+        </span>
+        <ActionButton
           variant="ghost"
           size="sm"
-          className="text-rose-400/80 hover:text-rose-300"
+          className="text-rose-400/80 hover:bg-rose-500/10 hover:text-rose-300"
           disabled={disabled}
           onClick={() => setConfirm("reset")}
         >
           Reset DB
         </ActionButton>
-      </ActionRow>
+      </div>
 
       {confirm === "reset" && (
         <ConfirmDialog
           danger
           title="Reset local database?"
-          body="This drops the local database and re-applies all migrations and seed data. Local data will be lost."
+          body="This drops the local database and re-applies all migrations and seed data. Local data will be permanently lost."
           confirmLabel="Reset DB"
           onConfirm={() => run("reset")}
           onClose={() => setConfirm(null)}
         />
       )}
+
       {confirm === "functions" && projectDir && (
         <FunctionsDialog
           projectDir={projectDir}
@@ -225,11 +281,12 @@ export function SupabaseCard({
           onClose={() => setConfirm(null)}
         />
       )}
+
       {confirm === "deploy" && (
         <ConfirmDialog
           title="Push migrations to remote?"
-          body="Runs `supabase db push --yes` against the linked remote project. Make sure the project is linked and the migrations are what you expect."
-          confirmLabel="Deploy"
+          body="Runs `supabase db push --yes` against the linked remote project. Make sure the remote project is linked and your local migrations are verified."
+          confirmLabel="Deploy Remote"
           onConfirm={() => run("deploy")}
           onClose={() => setConfirm(null)}
         />

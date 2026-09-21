@@ -92,9 +92,9 @@ export default function App() {
   }, [choose, runner]);
 
   return (
-    <div className="flex min-h-screen flex-col gap-4 bg-[#0b0b0b] p-4 text-zinc-300 antialiased lg:h-screen lg:p-5">
+    <div className="flex min-h-screen flex-col gap-4 bg-canvas p-4 text-zinc-300 antialiased lg:h-screen lg:p-5">
       {/* App Header */}
-      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-2xl bg-[#121212] px-4 py-3 ring-1 ring-white/[0.06] shadow-xl">
+      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-2xl bg-card px-4 py-3 ring-1 ring-white/[0.06]">
         <div className="flex items-center gap-3">
           <LogoMark size={24} />
           <div>
@@ -114,19 +114,19 @@ export default function App() {
             label={runner.busy !== null ? `Running: ${runner.busy}` : projectDir ? "Ready" : "No Workspace"}
           />
           <div className="hidden sm:flex items-center gap-2 border-l border-white/[0.08] pl-4 text-[10px] font-mono text-zinc-500">
-            <span><kbd className="rounded bg-white/[0.06] px-1.5 py-0.5 text-zinc-400">⌘O</kbd> Open</span>
-            <span><kbd className="rounded bg-white/[0.06] px-1.5 py-0.5 text-zinc-400">⌘K</kbd> Clear</span>
+            <span><kbd className="rounded bg-well px-1.5 py-0.5 text-zinc-400">⌘O</kbd> Open</span>
+            <span><kbd className="rounded bg-well px-1.5 py-0.5 text-zinc-400">⌘K</kbd> Clear</span>
           </div>
         </div>
       </header>
 
       {/* Web Fallback Warning Banner */}
       {!isTauri && (
-        <div className="flex items-center justify-between rounded-xl bg-amber-500/10 px-4 py-2.5 text-xs text-amber-300 ring-1 ring-inset ring-amber-500/20">
+        <div className="flex items-center justify-between rounded-xl bg-well px-4 py-2.5 text-xs text-zinc-300 ring-1 ring-inset ring-white/10">
           <span>
             Browser Preview Mode: Native desktop process executions require the Tauri shell.
           </span>
-          <code className="rounded bg-amber-500/20 px-2 py-0.5 font-mono text-[11px] text-amber-200">
+          <code className="rounded bg-canvas px-2 py-0.5 font-mono text-[11px] text-zinc-200">
             npm run tauri dev
           </code>
         </div>

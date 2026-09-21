@@ -26,13 +26,13 @@ type Runner = ReturnType<typeof useRunner>;
 // ── Method Color Helpers ──────────────────────────────────────────────────
 
 const METHOD_COLOR: Record<string, string> = {
-  GET: "text-emerald-400",
-  POST: "text-brand-400 font-semibold",
-  PUT: "text-amber-400",
-  PATCH: "text-amber-300",
-  DELETE: "text-rose-400 font-semibold",
-  HEAD: "text-sky-400",
-  OPTIONS: "text-purple-400",
+  GET: "text-zinc-300",
+  POST: "text-white font-semibold",
+  PUT: "text-zinc-300",
+  PATCH: "text-zinc-400",
+  DELETE: "text-zinc-200 font-semibold",
+  HEAD: "text-zinc-500",
+  OPTIONS: "text-zinc-500",
 };
 
 export function CurlPanel({
@@ -164,7 +164,7 @@ export function CurlPanel({
                 <ActionButton
                   variant="ghost"
                   size="sm"
-                  className="text-rose-400 hover:text-rose-300"
+                  className="text-zinc-500 hover:text-zinc-300"
                   onClick={() => setShowDeleteConfirm(true)}
                 >
                   Delete
@@ -184,7 +184,7 @@ export function CurlPanel({
               }`}
             >
               {METHODS.map((m) => (
-                <option key={m} className="bg-[#121212] text-zinc-200" value={m}>
+                <option key={m} className="bg-card text-zinc-200" value={m}>
                   {m}
                 </option>
               ))}
@@ -248,20 +248,20 @@ export function CurlPanel({
                 type="checkbox"
                 checked={draft.followRedirects}
                 onChange={(e) => patch({ followRedirects: e.target.checked })}
-                className="h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-900 accent-brand-500 focus:ring-0"
+                className="h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-900 accent-white focus:ring-0"
               />
               Follow redirects (max 5)
             </label>
 
             {placeholders && (
-              <span className="rounded-md bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-300 ring-1 ring-inset ring-amber-500/20">
+              <span className="rounded-md bg-well px-2.5 py-1 text-[11px] font-medium text-zinc-300 ring-1 ring-inset ring-white/10">
                 Replace <code>YOUR_…</code> placeholders before sending
               </span>
             )}
           </div>
 
           {/* cURL Command Output Snippet */}
-          <div className="flex flex-col gap-2 rounded-xl bg-[#0e0e0e] p-3 ring-1 ring-white/[0.06]">
+          <div className="flex flex-col gap-2 rounded-xl bg-well p-3 ring-1 ring-white/[0.1]">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-zinc-500">
                 Generated cURL Command
@@ -269,12 +269,12 @@ export function CurlPanel({
               <button
                 type="button"
                 onClick={copy}
-                className="text-[11px] font-medium text-brand-400 hover:text-brand-300 transition-colors"
+                className="text-[11px] font-medium text-white hover:text-zinc-300 transition-colors"
               >
                 {copied ? "Copied to clipboard!" : "Copy command"}
               </button>
             </div>
-            <pre className="max-h-28 overflow-auto whitespace-pre-wrap break-all font-mono text-[11px] leading-relaxed text-zinc-400 selection:bg-brand-500/20 selection:text-brand-300">
+            <pre className="max-h-28 overflow-auto whitespace-pre-wrap break-all font-mono text-[11px] leading-relaxed text-zinc-400 selection:bg-white/20 selection:text-white">
               {command}
             </pre>
           </div>

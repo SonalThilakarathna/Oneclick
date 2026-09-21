@@ -15,12 +15,12 @@ export function ProjectBar({
   onPick: () => void;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-[#121212] px-3.5 py-2.5">
-      <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.04] text-zinc-400">
+    <div className="flex items-center gap-3 rounded-2xl bg-card px-3.5 py-2.5 ring-1 ring-white/[0.06]">
+      <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.05] text-zinc-400">
         <IconFolder />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-zinc-600">Project</p>
+        <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-zinc-500">Project</p>
         <p className="truncate text-sm text-white" title={projectDir ?? undefined}>
           {projectDir ? shortPath(projectDir) : "No folder selected"}
         </p>

@@ -113,14 +113,14 @@ function CommandDialog({
                     onClick={() => setMode(m.value)}
                     className={`flex flex-col items-start gap-1 rounded-xl p-3 text-left transition-all ring-1 ${
                       isSelected
-                        ? "bg-brand-500/10 ring-brand-500/40 text-white"
-                        : "bg-[#0e0e0e] ring-white/[0.06] text-zinc-400 hover:bg-white/[0.03]"
+                        ? "bg-well ring-white/25 text-white"
+                        : "bg-well/50 ring-white/[0.06] text-zinc-400 hover:bg-well"
                     }`}
                   >
                     <div className="flex w-full items-center justify-between">
                       <span className="text-xs font-semibold">{m.label}</span>
                       {isSelected && (
-                        <span className="h-2 w-2 rounded-full bg-brand-500 shadow-[0_0_6px_rgba(140,250,16,0.8)]" />
+                        <span className="h-2 w-2 rounded-full bg-white" />
                       )}
                     </div>
                     <span className="text-[11px] leading-snug text-zinc-500">
@@ -135,7 +135,7 @@ function CommandDialog({
           <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-zinc-400 select-none">
             <input
               type="checkbox"
-              className="h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-900 accent-brand-500 focus:ring-0"
+              className="h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-900 accent-white focus:ring-0"
               checked={allProjects}
               onChange={(e) => setAllProjects(e.target.checked)}
             />
@@ -146,7 +146,7 @@ function CommandDialog({
             {initial ? (
               <ActionButton
                 variant="ghost"
-                className="text-rose-400 hover:text-rose-300"
+                className="text-zinc-500 hover:text-zinc-300"
                 onClick={() => setShowDeleteConfirm(true)}
               >
                 Delete
@@ -235,7 +235,7 @@ export function CustomCommandsCard({
     >
       {visible.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-white/10 p-5 text-center">
-          <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500/10 text-brand-500">
+          <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-well text-zinc-300">
             <IconBolt />
           </div>
           <p className="text-xs font-semibold text-zinc-300">No Custom Commands</p>

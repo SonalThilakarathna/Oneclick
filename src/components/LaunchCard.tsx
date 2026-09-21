@@ -1,17 +1,22 @@
 import { api, type LaunchTool } from "../lib/api";
 import type { useRunner } from "../hooks/useRunner";
 import { IconLaunch } from "./icons";
-import { ActionButton, Card } from "./ui";
+import { Card } from "./ui";
 
 type Runner = ReturnType<typeof useRunner>;
 
-const EDITORS: { id: LaunchTool; name: string }[] = [
+interface ToolOption {
+  id: LaunchTool;
+  name: string;
+}
+
+const EDITORS: ToolOption[] = [
   { id: "vscode", name: "VS Code" },
   { id: "cursor", name: "Cursor" },
   { id: "antigravity", name: "Antigravity" },
 ];
 
-const AI_CLIS: { id: LaunchTool; name: string }[] = [
+const AI_CLIS: ToolOption[] = [
   { id: "claude", name: "Claude Code" },
   { id: "codex", name: "Codex" },
 ];
@@ -26,47 +31,75 @@ export function LaunchCard({
   available: Record<LaunchTool, boolean> | null;
   runner: Runner;
 }) {
-  const launch = (tool: { id: LaunchTool; name: string }) =>
-    projectDir && runner.run(`Launch: ${tool.name}`, () => api.launchTool(tool.id, projectDir));
-
-  const button = (tool: { id: LaunchTool; name: string }, variant: "outline" | "soft") => {
-    const missing = available !== null && !available[tool.id];
-    return (
-      <ActionButton
-        key={tool.id}
-        variant={variant}
-        size="sm"
-        disabled={!projectDir || runner.busy !== null || missing}
-        title={missing ? `\`${tool.name}\` was not found on your PATH` : undefined}
-        onClick={() => launch(tool)}
-      >
-        {tool.name}
-      </ActionButton>
+  const launch = (tool: ToolOption) => {
+    if (!projectDir) return;
+    void runner.run(`Launch: ${tool.name}`, () =>
+      api.launchTool(tool.id, projectDir)
     );
   };
 
+  const renderToolGroup = (groupTitle: string, tools: ToolOption[]) => (
+    <div className="flex flex-col gap-2">
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+        {groupTitle}
+      </span>
+      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+        {tools.map((tool) => {
+          const isMissing = available !== null && !available[tool.id];
+          const isDisabled = !projectDir || runner.busy !== null || isMissing;
+
+          return (
+            <button
+              key={tool.id}
+              type="button"
+              disabled={isDisabled}
+              onClick={() => launch(tool)}
+              title={
+                isMissing
+                  ? `"${tool.name}" executable was not found on your system PATH`
+                  : !projectDir
+                  ? "Select a project workspace first"
+                  : `Open workspace in ${tool.name}`
+              }
+              className={`group relative flex items-center justify-between rounded-xl px-3 py-2 text-left text-xs font-medium transition-all ring-1 ${
+                isDisabled
+                  ? "cursor-not-allowed bg-white/[0.02] text-zinc-600 ring-white/[0.04]"
+                  : "bg-[#0e0e0e] text-zinc-200 ring-white/[0.08] hover:bg-white/[0.06] hover:text-white hover:ring-white/20 active:scale-[0.98]"
+              }`}
+            >
+              <span className="truncate">{tool.name}</span>
+              {available !== null && (
+                <span
+                  className={`h-1.5 w-1.5 shrink-0 rounded-full transition-colors ${
+                    isMissing
+                      ? "bg-zinc-700"
+                      : "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.7)]"
+                  }`}
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const hasMissingTools =
+    available && Object.values(available).some((v) => !v);
+
   return (
     <Card title="Launch" icon={<IconLaunch />} iconTone="launch">
-      <div className="flex flex-col gap-2.5">
-        <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-zinc-600">Editors</p>
-        <div className="flex flex-wrap gap-1.5">
-          {EDITORS.map((t) => button(t, "soft"))}
-        </div>
+      <div className="flex flex-col gap-4">
+        {renderToolGroup("Code Editors", EDITORS)}
+        {renderToolGroup("AI Coding CLIs", AI_CLIS)}
+
+        {hasMissingTools && (
+          <div className="rounded-xl bg-white/[0.02] p-2.5 text-[11px] leading-relaxed text-zinc-500 ring-1 ring-white/[0.04]">
+            Disabled items were not detected on system <code className="text-zinc-400">PATH</code>. Run{" "}
+            <span className="font-medium text-zinc-300">Environment Check</span> in Toolbox for setup instructions.
+          </div>
+        )}
       </div>
-      <div className="flex flex-col gap-2.5">
-        <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-zinc-600">
-          AI coding CLIs
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          {AI_CLIS.map((t) => button(t, "outline"))}
-        </div>
-      </div>
-      {available && Object.values(available).some((v) => !v) && (
-        <p className="text-xs text-zinc-600">
-          Greyed-out tools aren’t on your PATH. Run{" "}
-          <span className="text-zinc-400">Environment Check</span> in the Toolbox for install hints.
-        </p>
-      )}
     </Card>
   );
 }

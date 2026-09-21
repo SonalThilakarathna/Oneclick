@@ -13,10 +13,10 @@ function cn(...classes: (string | boolean | undefined | null)[]) {
 export type DotState = "running" | "stopped" | "unknown" | "busy";
 
 const DOT: Record<DotState, string> = {
-  running: "bg-brand-500 shadow-[0_0_8px_rgba(140,250,16,0.6)]",
+  running: "bg-white shadow-[0_0_8px_rgba(255,255,255,0.35)]",
   stopped: "bg-zinc-600",
   unknown: "bg-zinc-700",
-  busy: "bg-amber-400 animate-pulse shadow-[0_0_8px_rgba(251,191,36,0.6)]",
+  busy: "bg-zinc-300 animate-pulse shadow-[0_0_8px_rgba(255,255,255,0.25)]",
 };
 
 export function StatusDot({ state, label }: { state: DotState; label: string }) {
@@ -36,9 +36,9 @@ const ICON_TINT: Record<string, string> = {
   play: "text-zinc-400 bg-white/[0.04]",
   launch: "text-zinc-400 bg-white/[0.04]",
   wrench: "text-zinc-400 bg-white/[0.04]",
-  request: "text-brand-500 bg-brand-500/10 ring-1 ring-brand-500/20",
+  request: "text-zinc-300 bg-white/[0.06] ring-1 ring-white/10",
   folder: "text-zinc-400 bg-white/[0.04]",
-  accent: "text-brand-500 bg-brand-500/10 ring-1 ring-brand-500/20",
+  accent: "text-zinc-200 bg-white/[0.08] ring-1 ring-white/12",
 };
 
 export function Card({
@@ -59,11 +59,11 @@ export function Card({
   return (
     <section
       className={cn(
-        "flex flex-col gap-3.5 rounded-2xl bg-[#121212] px-4 py-4 ring-1 ring-white/[0.06] shadow-xl shadow-black/40 transition-all",
+        "flex flex-col gap-3.5 rounded-2xl bg-card px-4 py-4 ring-1 ring-white/[0.06] transition-all",
         className
       )}
     >
-      <header className="flex items-center justify-between gap-3 border-b border-white/[0.04] pb-3">
+      <header className="flex items-center justify-between gap-3 border-b border-white/[0.06] pb-3">
         <h2 className="flex items-center gap-2.5 text-[13px] font-semibold tracking-wide text-white">
           <span
             className={cn(
@@ -85,7 +85,7 @@ export function Card({
 // ── Form fields ───────────────────────────────────────────────────────────
 
 export const inputClass =
-  "w-full rounded-lg border-0 bg-[#0e0e0e] px-3 py-2 text-xs text-white ring-1 ring-inset ring-white/[0.08] placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-brand-500/50 disabled:opacity-40 font-mono transition-all";
+  "w-full rounded-lg border-0 bg-well px-3 py-2 text-xs text-white ring-1 ring-inset ring-white/[0.07] placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-white/25 disabled:opacity-40 font-mono transition-all";
 
 export const textareaClass = cn(inputClass, "resize-none leading-relaxed");
 
@@ -99,13 +99,16 @@ type Variant = "primary" | "success" | "outline" | "soft" | "danger" | "ghost";
 type Size = "sm" | "md" | "lg";
 
 const VARIANT: Record<Variant, string> = {
-  primary: "bg-brand-500 text-black font-semibold hover:bg-brand-400 active:bg-brand-600 shadow-sm shadow-brand-500/20",
-  success: "bg-brand-500 text-black font-semibold hover:bg-brand-400 active:bg-brand-600",
+  /* Mid-grey primary — readable without stealing focus from content */
+  primary:
+    "bg-[#2e2e2e] text-zinc-100 font-medium ring-1 ring-inset ring-white/10 hover:bg-[#383838] hover:text-white active:bg-[#424242]",
+  success:
+    "bg-[#2e2e2e] text-zinc-100 font-medium ring-1 ring-inset ring-white/10 hover:bg-[#383838] hover:text-white active:bg-[#424242]",
   outline:
-    "bg-transparent text-zinc-200 ring-1 ring-inset ring-white/10 hover:bg-white/[0.04] hover:ring-white/20 active:bg-white/[0.08]",
-  soft: "bg-white/[0.05] text-zinc-300 hover:bg-white/[0.08] hover:text-white active:bg-white/[0.12]",
-  danger: "bg-rose-600/90 text-white hover:bg-rose-500 active:bg-rose-700 shadow-sm shadow-rose-900/30",
-  ghost: "bg-transparent text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300 active:bg-white/[0.08]",
+    "bg-transparent text-zinc-300 ring-1 ring-inset ring-white/10 hover:bg-white/[0.04] hover:text-zinc-100 hover:ring-white/16 active:bg-white/[0.06]",
+  soft: "bg-well text-zinc-400 hover:bg-[#2a2a2a] hover:text-zinc-200 active:bg-[#303030]",
+  danger: "bg-transparent text-zinc-500 ring-1 ring-inset ring-white/8 hover:bg-white/[0.04] hover:text-zinc-300",
+  ghost: "bg-transparent text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300 active:bg-white/[0.06]",
 };
 
 const SIZE: Record<Size, string> = {
@@ -134,7 +137,7 @@ export function ActionButton({
       type="button"
       disabled={disabled || loading}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/50 disabled:cursor-not-allowed disabled:opacity-40 active:scale-[0.98]",
+        "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 disabled:cursor-not-allowed disabled:opacity-40 active:scale-[0.98]",
         VARIANT[variant],
         SIZE[size],
         className
@@ -185,7 +188,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="w-full max-w-md rounded-2xl bg-[#161616] p-5 shadow-2xl shadow-black/80 ring-1 ring-white/[0.08]"
+        className="w-full max-w-md rounded-2xl bg-modal p-5 shadow-2xl shadow-black/60 ring-1 ring-white/[0.08]"
       >
         <h3 className="mb-3 text-sm font-semibold tracking-wide text-white">{title}</h3>
         {children}
@@ -233,12 +236,12 @@ export function ConfirmDialog({
 // ── Log console ───────────────────────────────────────────────────────────
 
 const LOG_COLOR: Record<LogEntry["kind"], string> = {
-  cmd: "text-brand-400 font-semibold",
-  stdout: "text-zinc-300",
-  stderr: "text-amber-300/90",
-  info: "text-zinc-500",
-  ok: "text-brand-500",
-  err: "text-rose-400",
+  cmd: "text-zinc-100 font-semibold",
+  stdout: "text-zinc-400",
+  stderr: "text-zinc-300",
+  info: "text-zinc-600",
+  ok: "text-white",
+  err: "text-zinc-200",
 };
 
 export function LogConsole({ log, onClear }: { log: LogEntry[]; onClear: () => void }) {
@@ -264,10 +267,10 @@ export function LogConsole({ log, onClear }: { log: LogEntry[]; onClear: () => v
   };
 
   return (
-    <section className="flex h-56 shrink-0 flex-col rounded-2xl bg-[#0e0e0e] ring-1 ring-white/[0.06] shadow-inner">
-      <header className="flex items-center justify-between border-b border-white/[0.04] px-4 py-2.5">
+    <section className="flex h-56 shrink-0 flex-col overflow-hidden rounded-2xl bg-card ring-1 ring-white/[0.06]">
+      <header className="flex items-center justify-between border-b border-white/[0.06] px-4 py-2.5">
         <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-brand-500/80" />
+          <span className="h-1.5 w-1.5 rounded-full bg-white/80" />
           <h2 className="text-[10px] font-semibold uppercase tracking-[0.1em] text-zinc-500">
             Output Stream
           </h2>
@@ -293,7 +296,7 @@ export function LogConsole({ log, onClear }: { log: LogEntry[]; onClear: () => v
       </header>
       <div
         ref={bodyRef}
-        className="min-h-0 flex-1 overflow-y-auto px-4 py-3 font-mono text-[11px] leading-5 text-zinc-300 selection:bg-brand-500/20 selection:text-brand-300"
+        className="min-h-0 flex-1 overflow-y-auto bg-[#0a0a0a] px-4 py-3 font-mono text-[11px] leading-5 text-zinc-400 selection:bg-white/20 selection:text-white"
       >
         {log.length === 0 ? (
           <p className="text-zinc-600 italic">Command output will appear here...</p>

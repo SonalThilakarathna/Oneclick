@@ -145,16 +145,16 @@ export function LogoMark({
       className={`shrink-0 ${className}`}
       aria-hidden
     >
-      <rect width="32" height="32" rx="8" fill="#b9de07" />
+      <rect width="32" height="32" rx="8" fill="#ffffff" />
       <circle
         cx="16"
         cy="16"
         r="9"
         fill="none"
-        stroke="#0b0b0b"
+        stroke="#0d0d0d"
         strokeWidth="3.2"
       />
-      <circle cx="16" cy="16" r="3.6" fill="#0b0b0b" />
+      <circle cx="16" cy="16" r="3.6" fill="#0d0d0d" />
     </svg>
   );
 }
