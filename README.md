@@ -6,12 +6,10 @@
 
 Supabase · Git · Dev servers · VS Code / Cursor / Antigravity · Claude Code / Codex · cURL, all one click away.
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-be1f6e.svg)](LICENSE)
-![Tauri 2](https://img.shields.io/badge/Tauri-2-24C8DB?logo=tauri&logoColor=white)
-![Rust](https://img.shields.io/badge/Rust-stable-orange?logo=rust&logoColor=white)
-![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
-![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
-![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
+[![Tauri](https://img.shields.io/badge/Tauri_2-000000?style=flat-square&logo=tauri&logoColor=24C8DB)](https://tauri.app)
+[![Rust](https://img.shields.io/badge/Rust-000000?style=flat-square&logo=rust&logoColor=white)](https://rust-lang.org)
+[![React](https://img.shields.io/badge/React_19-000000?style=flat-square&logo=react&logoColor=61DAFB)](https://react.dev)
+[![License](https://img.shields.io/badge/License-MIT-000000?style=flat-square)](#license)
 
 
 
