@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { api, type ServiceStatus, type SupabaseAction } from "../lib/api";
 import type { useRunner } from "../hooks/useRunner";
-import { ActionButton, Card, ConfirmDialog, StatusDot, type DotState } from "./ui";
+import { IconStack } from "./icons";
+import { ActionButton, ActionRow, Card, ConfirmDialog, StatusDot, type DotState } from "./ui";
 
 type Runner = ReturnType<typeof useRunner>;
 
@@ -43,24 +44,48 @@ export function SupabaseCard({
         : "Unknown";
 
   return (
-    <Card title="Supabase" icon="⚡" status={<StatusDot state={dot} label={label} />}>
-      <p className="min-h-5 text-xs text-zinc-500">
+    <Card
+      title="Supabase"
+      icon={<IconStack />}
+      iconTone="stack"
+      status={<StatusDot state={dot} label={label} />}
+    >
+      <p className="text-xs leading-relaxed text-zinc-500">
         {status?.detail ?? "Local stack via the Supabase CLI and Docker."}
       </p>
-      <div className="grid grid-cols-2 gap-2">
-        <ActionButton variant="primary" disabled={disabled} onClick={() => run("start")}>
+      <ActionRow>
+        <ActionButton
+          variant="success"
+          size="lg"
+          className="min-w-[7.5rem] flex-1"
+          disabled={disabled}
+          onClick={() => run("start")}
+        >
           Start Local
         </ActionButton>
-        <ActionButton disabled={disabled} onClick={() => run("stop")}>
-          Stop Local
+        <ActionButton variant="outline" size="sm" disabled={disabled} onClick={() => run("stop")}>
+          Stop
         </ActionButton>
-        <ActionButton disabled={disabled} onClick={() => setConfirm("reset")}>
-          Reset DB
-        </ActionButton>
-        <ActionButton disabled={disabled} onClick={() => setConfirm("deploy")}>
+      </ActionRow>
+      <ActionRow>
+        <ActionButton
+          variant="ghost"
+          size="sm"
+          disabled={disabled}
+          onClick={() => setConfirm("deploy")}
+        >
           Deploy to Remote
         </ActionButton>
-      </div>
+        <ActionButton
+          variant="ghost"
+          size="sm"
+          className="text-rose-400/80 hover:text-rose-300"
+          disabled={disabled}
+          onClick={() => setConfirm("reset")}
+        >
+          Reset DB
+        </ActionButton>
+      </ActionRow>
 
       {confirm === "reset" && (
         <ConfirmDialog

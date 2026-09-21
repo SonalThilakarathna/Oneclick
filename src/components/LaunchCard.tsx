@@ -1,5 +1,6 @@
 import { api, type LaunchTool } from "../lib/api";
 import type { useRunner } from "../hooks/useRunner";
+import { IconLaunch } from "./icons";
 import { ActionButton, Card } from "./ui";
 
 type Runner = ReturnType<typeof useRunner>;
@@ -28,12 +29,13 @@ export function LaunchCard({
   const launch = (tool: { id: LaunchTool; name: string }) =>
     projectDir && runner.run(`Launch: ${tool.name}`, () => api.launchTool(tool.id, projectDir));
 
-  const button = (tool: { id: LaunchTool; name: string }, variant: "primary" | "neutral") => {
+  const button = (tool: { id: LaunchTool; name: string }, variant: "outline" | "soft") => {
     const missing = available !== null && !available[tool.id];
     return (
       <ActionButton
         key={tool.id}
         variant={variant}
+        size="sm"
         disabled={!projectDir || runner.busy !== null || missing}
         title={missing ? `\`${tool.name}\` was not found on your PATH` : undefined}
         onClick={() => launch(tool)}
@@ -44,23 +46,25 @@ export function LaunchCard({
   };
 
   return (
-    <Card title="Launch" icon="🧰">
-      <div className="flex flex-col gap-2">
-        <p className="text-xs uppercase tracking-wide text-zinc-500">Open project in editor</p>
-        <div className="grid grid-cols-2 gap-2">
-          {EDITORS.map((t) => button(t, "neutral"))}
+    <Card title="Launch" icon={<IconLaunch />} iconTone="launch">
+      <div className="flex flex-col gap-2.5">
+        <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-zinc-600">Editors</p>
+        <div className="flex flex-wrap gap-1.5">
+          {EDITORS.map((t) => button(t, "soft"))}
         </div>
       </div>
-      <div className="flex flex-col gap-2">
-        <p className="text-xs uppercase tracking-wide text-zinc-500">AI coding CLIs (new terminal)</p>
-        <div className="grid grid-cols-2 gap-2">
-          {AI_CLIS.map((t) => button(t, "primary"))}
+      <div className="flex flex-col gap-2.5">
+        <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-zinc-600">
+          AI coding CLIs
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {AI_CLIS.map((t) => button(t, "outline"))}
         </div>
       </div>
       {available && Object.values(available).some((v) => !v) && (
-        <p className="text-xs text-zinc-500">
-          Greyed-out tools aren’t on your PATH. Run <b className="text-zinc-400">Environment Check</b>{" "}
-          in the Toolbox for install hints.
+        <p className="text-xs text-zinc-600">
+          Greyed-out tools aren’t on your PATH. Run{" "}
+          <span className="text-zinc-400">Environment Check</span> in the Toolbox for install hints.
         </p>
       )}
     </Card>

@@ -1,4 +1,11 @@
 import { ActionButton } from "./ui";
+import { IconFolder } from "./icons";
+
+function shortPath(dir: string): string {
+  const parts = dir.replace(/[/\\]+$/, "").split(/[/\\]/);
+  if (parts.length <= 3) return dir;
+  return `…/${parts.slice(-2).join("/")}`;
+}
 
 export function ProjectBar({
   projectDir,
@@ -8,15 +15,19 @@ export function ProjectBar({
   onPick: () => void;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/70 px-4 py-3">
-      <span className="text-xs uppercase tracking-wide text-zinc-500">Project</span>
-      <span
-        className="min-w-0 flex-1 truncate font-mono text-sm text-zinc-300"
-        title={projectDir ?? undefined}
-      >
-        {projectDir ?? "No folder selected"}
+    <div className="flex items-center gap-3 rounded-2xl bg-[#121212] px-3.5 py-2.5">
+      <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.04] text-zinc-400">
+        <IconFolder />
       </span>
-      <ActionButton onClick={onPick}>{projectDir ? "Change…" : "Choose folder…"}</ActionButton>
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-zinc-600">Project</p>
+        <p className="truncate text-sm text-white" title={projectDir ?? undefined}>
+          {projectDir ? shortPath(projectDir) : "No folder selected"}
+        </p>
+      </div>
+      <ActionButton variant="outline" size="sm" onClick={onPick}>
+        {projectDir ? "Change" : "Choose folder"}
+      </ActionButton>
     </div>
   );
 }

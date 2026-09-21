@@ -1,6 +1,7 @@
 import { api, type ToolboxAction } from "../lib/api";
 import type { useRunner } from "../hooks/useRunner";
-import { ActionButton, Card } from "./ui";
+import { IconWrench } from "./icons";
+import { ActionButton, ActionRow, Card } from "./ui";
 
 type Runner = ReturnType<typeof useRunner>;
 
@@ -23,12 +24,15 @@ export function ToolboxCard({
   const disabled = !projectDir || runner.busy !== null;
 
   return (
-    <Card title="Toolbox" icon="🔧">
-      <p className="min-h-5 text-xs text-zinc-500">Handy helpers for the selected project.</p>
-      <div className="grid grid-cols-2 gap-2">
+    <Card title="Toolbox" icon={<IconWrench />} iconTone="wrench">
+      <p className="text-xs leading-relaxed text-zinc-500">Handy helpers for the selected project.</p>
+      <div className="flex flex-col gap-1.5">
         {STREAMED.map(({ action, label, title }) => (
           <ActionButton
             key={action}
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start px-2"
             disabled={disabled}
             title={title}
             onClick={async () => {
@@ -42,7 +46,12 @@ export function ToolboxCard({
             {label}
           </ActionButton>
         ))}
+      </div>
+      <ActionRow className="border-t border-white/5 pt-3">
         <ActionButton
+          variant="outline"
+          size="sm"
+          className="flex-1"
           disabled={disabled}
           onClick={() =>
             projectDir &&
@@ -52,6 +61,9 @@ export function ToolboxCard({
           Open Terminal
         </ActionButton>
         <ActionButton
+          variant="outline"
+          size="sm"
+          className="flex-1"
           disabled={disabled}
           onClick={() =>
             projectDir && runner.run("Toolbox: Open Folder", () => api.openFolder(projectDir))
@@ -59,7 +71,7 @@ export function ToolboxCard({
         >
           Open Folder
         </ActionButton>
-      </div>
+      </ActionRow>
     </Card>
   );
 }
