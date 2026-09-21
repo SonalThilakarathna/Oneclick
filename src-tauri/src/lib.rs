@@ -13,6 +13,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::supabase_status,
             commands::supabase_run,
+            commands::supabase_functions_list,
+            commands::supabase_functions_deploy,
             commands::git_status,
             commands::git_commit_push,
             devtools::project_info,

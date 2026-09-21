@@ -167,6 +167,84 @@ pub async fn supabase_run(
     .await
 }
 
+/// Edge functions are the folders under `supabase/functions`. Folders starting
+/// with `_` (e.g. `_shared`) or `.` hold shared code, not deployable functions.
+fn list_edge_functions(dir: &Path) -> Vec<String> {
+    let Ok(entries) = std::fs::read_dir(dir.join("supabase").join("functions")) else {
+        return Vec::new();
+    };
+    let mut names: Vec<String> = entries
+        .filter_map(Result::ok)
+        .filter(|e| e.path().is_dir())
+        .filter_map(|e| e.file_name().into_string().ok())
+        .filter(|n| !n.starts_with('_') && !n.starts_with('.'))
+        .collect();
+    names.sort();
+    names
+}
+
+#[tauri::command]
+pub async fn supabase_functions_list(project_dir: String) -> Result<Vec<String>, String> {
+    let dir = resolve_dir(&project_dir)?;
+    blocking(move || Ok(list_edge_functions(&dir))).await
+}
+
+/// Deploys edge functions to the linked remote project. An empty `functions`
+/// list deploys all of them; otherwise only the named ones, one at a time so it
+/// works on every CLI version and one failure doesn't hide the others.
+#[tauri::command]
+pub async fn supabase_functions_deploy(
+    app: AppHandle,
+    functions: Vec<String>,
+    project_dir: String,
+    run_id: String,
+) -> Result<ActionResult, String> {
+    let dir = resolve_dir(&project_dir)?;
+    if !dir.join("supabase").join("config.toml").is_file() {
+        return Ok(ActionResult::fail(
+            "No supabase/config.toml in this folder. Run `supabase init` first.",
+        ));
+    }
+
+    blocking(move || {
+        let available = list_edge_functions(&dir);
+        if available.is_empty() {
+            return Ok(ActionResult::fail("No edge functions found in supabase/functions."));
+        }
+
+        if functions.is_empty() {
+            let ok = run_streamed(&app, &run_id, "supabase", &["functions", "deploy"], &dir)?;
+            return Ok(if ok {
+                ActionResult::ok(format!("Deployed all edge functions ({}).", available.len()))
+            } else {
+                ActionResult::fail("`supabase functions deploy` failed. See the output above.")
+            });
+        }
+
+        // Only names that exist on disk are accepted; the UI can't inject arguments.
+        if let Some(unknown) = functions.iter().find(|f| !available.contains(f)) {
+            return Ok(ActionResult::fail(format!("Unknown edge function: {unknown}")));
+        }
+
+        let mut failed = Vec::new();
+        for name in &functions {
+            if !run_streamed(&app, &run_id, "supabase", &["functions", "deploy", name], &dir)? {
+                failed.push(name.as_str());
+            }
+        }
+
+        Ok(if failed.is_empty() {
+            ActionResult::ok(format!("Deployed {} edge function(s).", functions.len()))
+        } else {
+            ActionResult::fail(format!(
+                "Failed to deploy: {}. See the output above.",
+                failed.join(", ")
+            ))
+        })
+    })
+    .await
+}
+
 // ─────────────────────────────── Git ───────────────────────────────
 
 #[tauri::command]
