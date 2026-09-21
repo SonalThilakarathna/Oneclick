@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Permissions for the main OneClick window. No shell/fs access is granted to the webview: all commands run through the allow-listed Rust commands.",
+  "windows": ["main"],
+  "permissions": ["core:default", "dialog:allow-open"]
+}
